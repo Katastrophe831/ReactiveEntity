@@ -1,0 +1,13 @@
+{
+    "transform": {
+      "^.+\\.(t|j)sx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
+    "moduleNameMapper": {
+      "^@ReactiveEntity\/decorators(.*)$": "<rootDir>/src/decorators$1",
+      "^@ReactiveEntity\/exceptions(.*)$": "<rootDir>/src/exceptions$1",
+      "^@ReactiveEntity\/utils(.*)$": "<rootDir>/src/utils$1",
+      "^@ReactiveEntity(.*)$": "<rootDir>/src/orm$1"
+    }     
+}
