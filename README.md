@@ -28,7 +28,7 @@ const userData = {
 ```
 ### Reactive Entity
 
-Declare your model properties using the same case as your incoming JSON data.
+> Note: Declare your model properties using the same case as your incoming JSON data.
 
 ```typescript
 import { Entity } from '@ReactiveEntity';
