@@ -87,10 +87,14 @@ export class Entity {
 	/**
 	 * Get primary key name
 	 */
-	public get primaryKeyName() : string {
+	public get primaryKeyName(): string {
 		const keys = Object.keys(this.metaData.attributes.primaryKey);
-		if (!!keys.length == false){
-			throw new EntityException(this.constructor.name, 'entity#primarykeynotfound', 'Primary key not defined for object {{0}}')
+		if (!!keys.length === false) {
+			throw new EntityException(
+				this.constructor.name,
+				'entity#primarykeynotfound',
+				'Primary key not defined for object {{0}}',
+			);
 		}
 		return keys[0];
 	}
@@ -98,15 +102,15 @@ export class Entity {
 	/**
 	 * Get primary key value
 	 */
-	public get primaryKeyValue() : any {
+	public get primaryKeyValue(): any {
 		return (this as any)[this.primaryKeyName];
 	}
 
 	/**
 	 * Has primary key attribute defined
-	 * @returns 
+	 * @returns
 	 */
-	public get hasPrimaryKey() :boolean {
+	public get hasPrimaryKey(): boolean {
 		return !!Object.keys(this.metaData.attributes.primaryKey).length;
 	}
 	/**

@@ -49,15 +49,10 @@ describe('Playground', () => {
 	test('Used to run single test without running every test :)', () => {
 		// const entitySet: UserSet = new UserSet({ data: data, isReadonly: false, appName: 'USERAPP' });
 		// const entity: User = entitySet[0];
-
-
 	});
 
 	test('Entity check primary key', () => {
-
-		class UserTest extends User {
-
-		}
+		class UserTest extends User {}
 
 		class UserTest2 extends User {
 			@PrimaryKey
@@ -65,7 +60,7 @@ describe('Playground', () => {
 		}
 
 		const entity: User = new UserTest(data[0]);
-		expect(()=>entity.primaryKeyName).toThrowError('Primary key not defined for object UserTest')
+		expect(() => entity.primaryKeyName).toThrowError('Primary key not defined for object UserTest');
 
 		const entity2: User = new UserTest2(data[0]);
 		expect(entity2.primaryKeyName).toBe('PRIMARYKEY');
