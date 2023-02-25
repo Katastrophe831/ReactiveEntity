@@ -11,7 +11,7 @@ The main goal of this project is to decouple your domain model from your backend
 # Why use ReactiveEntity?
 
 * Works in both browser and Node
-* Built for Angular UI components without the need of Reactive Forms
+* Built for Angular UI components without the need for Reactive Forms
 * Multilingual support (Coming soon)
 * Locale support (Coming soon)
 
@@ -53,14 +53,15 @@ All of the business logic can be contained within the Entity and your entities c
 
 ### Supported Features
 
-* Internal change tracking
-* Readonly / required fields
-* Select / Unselect
-* Delete / Undelete
-* Non - Persistent fields
-* Field validations
-* Field exception handling
-* Multiple inheritance
+* [Internal change tracking](#internal-change-tracking)
+* [Readonly / required fields](#readonly--required-fields)
+* [Select / Unselect](#select--unselect)
+* [Delete / Undelete](#delete--undelete)
+* [Field validations](#field-validations)
+* [Field exception handling](#field-exception-handling)
+* [Non-Persistent fields](#non-persistent-fields)
+* [Inheritance](#inheritance)
+* [Decorators](#decorators)
 
 # Internal Change Tracking
 
@@ -125,7 +126,7 @@ user.isSelected; // true
 user.unselect();
 user.isSelected; // false
 ```
-# Delete / undelete
+# Delete / Undelete
 
 ### This is a non-desctructive action.  Only sets the meta data as 'to be deleted' which can be used to send to your API service to determain what to do with that information
 
@@ -141,9 +142,14 @@ user.toBeDeleted; // false
 
 # Field Validations
 
+> See also [Decorators](#decorators)
+
+
+
 # Field Exception Handling
 
 # Non-Persistent Fields
 
+# Inheritance
 
-
+# Decorators
