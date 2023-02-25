@@ -66,7 +66,7 @@ All of the business logic can be contained within the Entity and your entities c
 
 ### Detecting and Marking Changes
 
-When an entity is modified, there are entity and field level flags to mark them as being modified.
+### When an entity is modified, there are entity and field level flags to mark them as being modified.
 
 ```typescript
 user.FIRSTNAME = 'Jane';
@@ -74,11 +74,11 @@ user.FIRSTNAME = 'Jane';
 console.log(user.toBeSaved) // true
 console.log(user.isFieldModified('FIRSTNAME')) // true
 ```
-### Readonly / Required Fields
+# Readonly / Required Fields
 
 > .setFieldRequired(attribute: string | string[], required: boolean): void
 
-Mark fields required
+### Mark fields required
 
 ```typescript
 user.setFieldRequired('FIRSTNAME', true);
@@ -91,7 +91,7 @@ user.validate(); // throws exception 'Attribute NAME is required'
 
 > .setFieldReadonly(attribute: string | string[], readonly: boolean): void
 
-Mark fields readonly
+### Mark fields readonly
 
 ```typescript
 user.setFieldReadonly('FIRSTNAME', true);
@@ -100,13 +100,13 @@ user.isFieldReadonly('FIRSTNAME') // true
 user.FIRSTNAME = null; // throws exception 'Attribute NAME is readonly'
 ```
 
-Mark multiple fields readonly / required
+### Mark multiple fields readonly / required
 
 ```typescript
 user.setFieldReadonly(['FIRSTNAME', 'LASTNAME'], true);
 user.isFieldReadonly('FIRSTNAME') // true
 ```
-Mark whole entity as readonly
+### Mark whole entity as readonly
 
 > .setReadonly(isReadonly: boolean): void
 
@@ -114,7 +114,7 @@ Mark whole entity as readonly
 user.setReadonly(true);
 user.FIRSTNAME = 'Jane'; // throws exception 'Entity User is readonly'
 ```
-### Select / Unselect
+# Select / Unselect
 
 > .select();  
 > .unselect();
@@ -125,9 +125,9 @@ user.isSelected; // true
 user.unselect();
 user.isSelected; // false
 ```
-### Delete / undelete
+# Delete / undelete
 
-This is a non-desctructive action.  Only sets the meta data as 'to be deleted' which can be used to send to your API service to determain what to do with that information
+### This is a non-desctructive action.  Only sets the meta data as 'to be deleted' which can be used to send to your API service to determain what to do with that information
 
 > .delete();  
 > .undelete();
@@ -139,11 +139,11 @@ user.undelete();
 user.toBeDeleted; // false
 ```
 
-### Field Validations
+# Field Validations
 
-### Field Exception Handling
+# Field Exception Handling
 
-### Non-Persistent Fields
+# Non-Persistent Fields
 
 
 
