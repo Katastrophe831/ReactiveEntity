@@ -6,7 +6,7 @@ There is a lot of discussion around Anemic Models vs. Rich Domain Models in Doma
 
 # Goals
 
-The main goal of this project is to decouple your domain model from your backend using JSON data as your interface.  JSON (anemic) data is king!  Your backend could be MSSQL, Mongo or even a REST API service. As long as you have a JSON data model, you can wrap it a ReactiveEntity with domain business logic. Then build reactive front end applications along with field validations and convert your rich domain models back to <u>**validated**</u> JSON data to pass back to your persistent data store.  No more need for front end reactive forms and backend DTOs.
+The main goal of this project is to decouple your domain model from your backend using JSON data as your interface.  JSON (anemic) data is king!  There is built in typesafe checks but the main focus is to still be flexible when working with JSON data.  Your backend could be MSSQL, Mongo or even a REST API service. As long as you have a JSON data model, you can wrap it a ReactiveEntity with domain business logic. Then build reactive front end applications along with field validations and convert your rich domain models back to <u>**validated**</u> JSON data to pass back to your persistent data store.  No more need for front end reactive forms and backend DTOs.
 
 # Why use ReactiveEntity?
 
@@ -108,9 +108,42 @@ user.isFieldReadonly('FIRSTNAME') // true
 ```
 Mark whole entity as readonly
 
-> setReadonly(isReadonly: boolean): void
+> .setReadonly(isReadonly: boolean): void
 
 ```typescript
 user.setReadonly(true);
 user.FIRSTNAME = 'Jane'; // throws exception 'Entity User is readonly'
 ```
+### Select / Unselect
+
+> .select();  
+> .unselect();
+
+```typescript
+user.select();
+user.isSelected; // true
+user.unselect();
+user.isSelected; // false
+```
+### Delete / undelete
+
+This is a non-desctructive action.  Only sets the meta data as 'to be deleted' which can be used to send to your API service to determain what to do with that information
+
+> .delete();  
+> .undelete();
+
+```typescript
+user.delete();
+user.toBeDeleted; // true
+user.undelete();
+user.toBeDeleted; // false
+```
+
+### Field Validations
+
+### Field Exception Handling
+
+### Non-Persistent Fields
+
+
+
