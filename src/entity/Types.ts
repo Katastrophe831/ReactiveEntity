@@ -49,6 +49,11 @@ export type AttributeMetaDataBooleanProperties = {
 	 * Hold all fields that are non-persistent
 	 */
 	isNonPersistent: AttributeBooleanType;
+
+	/**
+	 * Primary key
+	 */
+	primaryKey: AttributeBooleanType;
 };
 
 export type AttributeValidator = {

@@ -1,6 +1,6 @@
 import { EntitySet, Entity, EntityAttributes, FieldAccess } from '../entity';
 import { AttributeReadonlyException, AttributeRequiredException } from '../exceptions';
-import { AttributeConfig, NonPersistentAttribute, Readonly, Required, ValidatorJS } from '../decorators';
+import { AttributeConfig, NonPersistentAttribute, PrimaryKey, Readonly, Required, ValidatorJS } from '../decorators';
 
 const data = [
 	{
@@ -50,36 +50,24 @@ describe('Playground', () => {
 		// const entitySet: UserSet = new UserSet({ data: data, isReadonly: false, appName: 'USERAPP' });
 		// const entity: User = entitySet[0];
 
+
+	});
+
+	test('Entity check primary key', () => {
+
 		class UserTest extends User {
-			protected onBeforeChange(attribute: string, value: any): any {
-				const keys: EntityAttributes<this> = {
-					NAME: (): any => {
-						if (value === 'test change') {
-							throw Error(value);
-						}
-						return value;
-					},
-				};
-				const func = keys[attribute];
-				return func ? func() : value;
-			}
+
+		}
+
+		class UserTest2 extends User {
+			@PrimaryKey
+			PRIMARYKEY!: string;
 		}
 
 		const entity: User = new UserTest(data[0]);
-		expect(entity.toBeSaved).toBe(false);
-		expect(() => entity.setValue('NAME', 'test change')).toThrowError(new Error('test change'));
-		expect(entity.isFieldModified('NAME')).toBe(false);
-		expect(entity.toBeSaved).toBe(false);
+		expect(()=>entity.primaryKeyName).toThrowError('Primary key not defined for object UserTest')
 
-		entity.setValue('NAME', 'works', FieldAccess.NOCHANGE);
-		expect(entity.NAME).toBe('works');
-		expect(entity.isFieldModified('NAME')).toBe(false);
-		expect(entity.toBeSaved).toBe(false);
-
-		entity.NAME = 'Test User';
-		expect(entity.toBeSaved).toBe(true);
-
-		entity.reset();
-		expect(entity.toBeSaved).toBe(false);
+		const entity2: User = new UserTest2(data[0]);
+		expect(entity2.primaryKeyName).toBe('PRIMARYKEY');
 	});
 });

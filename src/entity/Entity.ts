@@ -18,6 +18,8 @@ import {
 	AttributeReadonlyException,
 	AttributeRequiredException,
 	EntityReadonlyException,
+	EntityException,
+	Exception,
 } from '../exceptions';
 
 export class Entity {
@@ -83,15 +85,30 @@ export class Entity {
 	}
 
 	/**
-	 * Get meta data
+	 * Get primary key name
 	 */
-	protected get attributeValidators(): ValidatorType {
-		if (!this.__ATTRIBUTE_VALIDATORS) {
-			this.__ATTRIBUTE_VALIDATORS = {};
+	public get primaryKeyName() : string {
+		const keys = Object.keys(this.metaData.attributes.primaryKey);
+		if (!!keys.length == false){
+			throw new EntityException(this.constructor.name, 'entity#primarykeynotfound', 'Primary key not defined for object {{0}}')
 		}
-		return this.__ATTRIBUTE_VALIDATORS;
+		return keys[0];
 	}
 
+	/**
+	 * Get primary key value
+	 */
+	public get primaryKeyValue() : any {
+		return (this as any)[this.primaryKeyName];
+	}
+
+	/**
+	 * Has primary key attribute defined
+	 * @returns 
+	 */
+	public get hasPrimaryKey() :boolean {
+		return !!Object.keys(this.metaData.attributes.primaryKey).length;
+	}
 	/**
 	 * Is readonly
 	 */
@@ -462,6 +479,16 @@ export class Entity {
 		} else {
 			this.attributeValidators[name].push({ property, args: validator.args });
 		}
+	}
+
+	/**
+	 * Get attribute validators
+	 */
+	protected get attributeValidators(): ValidatorType {
+		if (!this.__ATTRIBUTE_VALIDATORS) {
+			this.__ATTRIBUTE_VALIDATORS = {};
+		}
+		return this.__ATTRIBUTE_VALIDATORS;
 	}
 
 	/**

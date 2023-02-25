@@ -24,12 +24,13 @@ export class EntityMetaData implements BaseEntityMetaData {
 		isRequired: {},
 		isHidden: {},
 		isNonPersistent: {},
+		primaryKey: {},
 		messages: {},
 		validator: {},
 	};
 
 	public getUndeclaredProperties(data: any): any {
-		const metaDataProperties = ['isReadonly', 'isRequired', 'isNonPersistent'];
+		const metaDataProperties = ['isReadonly', 'isRequired', 'isNonPersistent', 'primaryKey'];
 
 		// Get all attributes declared by decorators
 		let props: any = {};

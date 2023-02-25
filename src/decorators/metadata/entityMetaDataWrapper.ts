@@ -3,7 +3,13 @@ import { Entity, AttributeMetaDataBooleanProperties, AttributeBooleanType } from
 export const entityMetaDataWrapper = (
 	target: Entity,
 	key: keyof AttributeMetaDataBooleanProperties,
-	callback: (attributeMetaData: AttributeBooleanType) => void,
+	member: string,
+	value: boolean = true,
+	callback?: (attributeMetaData: AttributeBooleanType) => void,
 ) => {
-	callback(target.metaData.attributes[key]);
+	target.metaData.attributes[key][member] = value;
+
+	if (typeof callback === 'function') {
+		callback(target.metaData.attributes[key]);
+	}
 };
