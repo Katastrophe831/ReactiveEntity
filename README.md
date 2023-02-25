@@ -17,7 +17,7 @@ The main goal of this project is to decouple your domain model from your backend
 
 # Basic Usage
 
-## Anemic Data Model
+### Anemic Data Model
 
 ```typescript
 const userData = {
@@ -26,7 +26,7 @@ const userData = {
     "LASTNAME": "Smith",
 }
 ```
-## Reactive Entity
+### Reactive Entity
 
 Declare your model properties using the same case as your incoming JSON data.
 
