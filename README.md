@@ -59,6 +59,7 @@ All of the business logic can be contained within the Entity and your entities c
 * [Delete / Undelete](#delete--undelete)
 * [Field validations](#field-validations)
 * [Field exception handling](#field-exception-handling)
+* [Field change event handlers](#field-change-event-handling)
 * [Non-Persistent fields](#non-persistent-fields)
 * [Inheritance](#inheritance)
 * [Decorators](#decorators)
@@ -128,7 +129,7 @@ user.isSelected; // false
 ```
 # Delete / Undelete
 
-### This is a non-desctructive action.  Only sets the meta data as 'to be deleted' which can be used to send to your API service to determain what to do with that information
+### This is a non-desctructive action.  Only sets the meta data as 'to be deleted' which can be used to send to your API service to determine what to do with that information
 
 > .delete();  
 > .undelete();
@@ -140,11 +141,68 @@ user.undelete();
 user.toBeDeleted; // false
 ```
 
+# Field Change Event Handling
+
+There are events to handle 'beforeChange' and 'afterChange' of field values.
+
+### Before Change
+
+> protected onBeforeChange(attribute: string, value: any): any { }
+>> **<u>Note</u>: this returns 'any'.  Be sure to always return a value.
+
+```typescript
+class User extends Entity {
+    USERID!:string;
+    FIRSTNAME!:string;
+    LASTNAME!:string;
+    BIRTHDAY!:Date;
+
+    // intercepts the value BEFORE it is set on the entity
+    protected onBeforeChange(attribute: string, value: any): any {        
+        if (attribute === 'FIRSTNAME' && value === 'Jane') {
+            return value += ' is awesome!';
+        }
+        // Be sure to always return a value
+        return value;
+    }
+}
+
+user.FIRSTNAME = 'Joe';
+console.log(user.FIRSTNAME) // Joe
+
+user.FIRSTNAME = 'Jane';
+console.log(user.FIRSTNAME) // Jane is awesome
+```
+
+### After Change
+
+> protected onAfterChange(attribute: string, value: any): void { }
+>> **<u>Note</u>: This returns a void as this event is run 'after' the value has been validated and set on the entity
+
+```typescript
+class User extends Entity {
+    USERID!:string;
+    FIRSTNAME!:string;
+    LASTNAME!:string;
+    BIRTHDAY!:Date;
+
+    // intercepts the value AFTER it is set on the entity
+    protected onAfterChange(attribute: string): void {        
+        if (attribute === 'FIRSTNAME') {
+            // Make LASTNAME required
+            this.setFieldRequired('LASTNAME');
+        }
+    }
+}
+```
+
 # Field Validations
 
 > See also [Decorators](#decorators)
 
+There is built in support for [ValidatorJS](https://github.com/mikeerickson/validatorjs) using a custom built decorator.  ValidatorJS has a bunch of validations that you can use out of the box.  If you can't find any that supports what you need, you can always roll your own decorator.  
 
+Another way to run your own validations, is to intercept the event handlers and customize according to your business rules.
 
 # Field Exception Handling
 
