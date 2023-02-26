@@ -58,14 +58,12 @@ class User extends Entity {
 		return func ? func() : value;
 	}
 
-	protected onAfterChange(attribute: string, value: any): void {
-		const keys: EntityAttributes<this> = {
-			NAME: (): any => {
-				this.USERID = value;
-			},
-		};
-		const func = keys[attribute];
-		return func ? func() : value;
+	protected onAfterChange(attribute: string): void {
+		switch (attribute) {
+			case "NAME":
+				this.USERID = this.NAME;
+			default:
+		}
 	}
 }
 

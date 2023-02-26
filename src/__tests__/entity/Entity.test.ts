@@ -119,16 +119,14 @@ describe('Entity Tests', () => {
 	test('To Be Saved - Field Access Modifiers', () => {
 		class UserTest extends User {
 			protected onBeforeChange(attribute: string, value: any): any {
-				const keys: EntityAttributes<this> = {
-					NAME: (): any => {
+				switch(attribute){
+					case "NAME":
 						if (value === 'test change') {
 							throw Error(value);
 						}
+					default:
 						return value;
-					},
-				};
-				const func = keys[attribute];
-				return func ? func() : value;
+				}
 			}
 		}
 
@@ -233,7 +231,7 @@ describe('Entity Tests', () => {
 
 	test('set read only internally/externally', () => {
 		class UserTest extends User {
-			protected onAfterChange(attribute: string, value: any): void {
+			protected onAfterChange(attribute: string): void {
 				const keys: EntityAttributes<this> = {
 					NAME: (): any => {
 						this.setFieldReadonly('READONLY', true);
@@ -242,7 +240,7 @@ describe('Entity Tests', () => {
 					},
 				};
 				const func = keys[attribute];
-				return func ? func() : value;
+				func ? func() : null;
 			}
 		}
 
@@ -288,6 +286,41 @@ describe('Entity Tests', () => {
 		expect(entity.isFieldHidden('DATE')).toBe(true);
 	});
 
+	test('hidden fields', () => {
+		/* 
+		class UserTest extends User {
+			@NonPersistentAttribute
+			public NON_PERSISTENT_FIELD!: string;
+
+			@NonPersistentAttribute
+			public DATE_ISREQUIRED!: number;
+
+			protected onFieldReadonly(attribute: string, value: boolean): boolean {
+				const keys: EntityAttributes<this> = {
+					DATE: () => this.DATE_ISREQUIRED === 1,
+				};
+				const func = keys[attribute];
+				return func ? func() : value;
+			}
+
+			protected onFieldHidden(attribute: string, value: boolean): boolean {
+				const keys: EntityAttributes<this> = {
+					DATE: () => this.DATE_ISREQUIRED === 1,
+				};
+				const func = keys[attribute];
+				return func ? func() : value;
+			}
+		}
+
+		const entity: UserTest = new UserTest(data[0]);
+		expect(entity.isFieldReadonly('DATE')).toBe(false);
+		expect(entity.isFieldHidden('DATE')).toBe(false);
+		entity.DATE_ISREQUIRED = 1;
+		expect(entity.isFieldReadonly('DATE')).toBe(true);
+		expect(entity.isFieldHidden('DATE')).toBe(true);
+ 		*/
+	});
+
 	test('check readonly fields when trying to update a value', () => {
 		const entitySet: EntitySet = new UserSet(data);
 		const entity: User = entitySet[0];
@@ -320,10 +353,13 @@ describe('Entity Tests', () => {
 	test('required fields', () => {
 		const entitySet: EntitySet = new UserSet(data);
 		const entity: User = entitySet[0];
+		entity.setFieldRequired('NAME', false);
+		expect(entity.isFieldRequired('NAME')).toBe(false);
 		entity.setFieldRequired('NAME', true);
 		expect(entity.isFieldRequired('NAME')).toBe(true);
-		entity.setFieldRequired('NAME', false);
-		expect(entity.isFieldReadonly('NAME')).toBe(false);
+
+		entity.NAME = null;
+		expect(()=>entity.validate()).toThrowError('Attribute NAME is required');
 
 		entity.setFieldRequired(['NAME', 'NUMTYPE'], true);
 		expect(entity.isFieldRequired('NAME')).toBe(true);
@@ -333,16 +369,34 @@ describe('Entity Tests', () => {
 		expect(entity.isFieldRequired('NUMTYPE')).toBe(true);
 	});
 
+	test('readonly fields', () => {
+		const entitySet: EntitySet = new UserSet(data);
+		const entity: User = entitySet[0];
+		entity.setFieldReadonly('NAME', false);
+		expect(entity.isFieldReadonly('NAME')).toBe(false);
+		entity.setFieldReadonly('NAME', true);
+		expect(entity.isFieldReadonly('NAME')).toBe(true);
+
+		expect(()=>entity.NAME = null).toThrowError('Attribute NAME is readonly');
+
+		entity.setFieldReadonly(['NAME', 'NUMTYPE'], true);
+		expect(entity.isFieldReadonly('NAME')).toBe(true);
+		expect(entity.isFieldReadonly('NUMTYPE')).toBe(true);
+		entity.setFieldReadonly('NAME', false);
+		expect(entity.isFieldReadonly('NAME')).toBe(false);
+		expect(entity.isFieldReadonly('NUMTYPE')).toBe(true);
+	});
+
 	test('required fields - on change', () => {
 		class UserTest extends User {
-			protected onAfterChange(attribute: string, value: any): void {
+			protected onAfterChange(attribute: string): void {
 				const keys: EntityAttributes<this> = {
 					NAME: () => {
 						this.setFieldRequired('USERID', true);
 					},
 				};
 				const func = keys[attribute];
-				return func ? func() : value;
+				func ? func() : null;
 			}
 		}
 

@@ -49,20 +49,55 @@ describe('Playground', () => {
 	test('Used to run single test without running every test :)', () => {
 		// const entitySet: UserSet = new UserSet({ data: data, isReadonly: false, appName: 'USERAPP' });
 		// const entity: User = entitySet[0];
-	});
 
-	test('Entity check primary key', () => {
-		class UserTest extends User {}
-
-		class UserTest2 extends User {
-			@PrimaryKey
-			PRIMARYKEY!: string;
+		const userData = {
+			"USERID": "1",
+			"FIRSTNAME": "John",
+			"LASTNAME": "Smith",
+			"BIRTHDAY": new Date()
 		}
 
-		const entity: User = new UserTest(data[0]);
-		expect(() => entity.primaryKeyName).toThrowError('Primary key not defined for object UserTest');
+		class User extends Entity {
+			@ValidatorJS({ rules: 'required' })
+			USERID!:string;
+			FIRSTNAME!:string;
+			LASTNAME!:string;    
+			PASSWORD!:string;
+		
+			@ValidatorJS({ rules: 'required|same:PASSWORD' })
+			CONFIRM_PASSWORD!:string;
+		
+			@ValidatorJS({ rules: 'required|email' })
+			EMAIL!:string;
+		
+			// intercepts the value BEFORE it is set on the entity
+			protected onBeforeChange(attribute: string, value: any): any {        
+				if (attribute === 'FIRSTNAME') {
+					return value += ' is awesome!';
+				}
+				// Be sure to always return a value
+				return value;
+			}    
+		}
+		
+		class Gamer extends User {
+			@Required
+			GAMERTAG!:string;
+		
+			// intercepts the value BEFORE it is set on the entity
+			protected onBeforeChange(attribute: string, value: any): any {        
+				if (attribute === 'FIRSTNAME' && value === 'Jane') {
+					value = 'GI ' + value;
+					return super.onBeforeChange(attribute, value);
+				}
+				// Be sure to always return a value
+				return value;
+			}
+		}
 
-		const entity2: User = new UserTest2(data[0]);
-		expect(entity2.primaryKeyName).toBe('PRIMARYKEY');
+		const user = new Gamer(userData);
+		user.FIRSTNAME = "Jane";
+		expect(user.FIRSTNAME).toBe("GI Jane is awesome!");
+		console.log(user.asData);
 	});
 });
