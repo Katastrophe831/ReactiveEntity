@@ -151,24 +151,6 @@ export class Entity {
 	}
 
 	/**
-	 * DTO object
-	 * @returns
-	 */
-	public get asData(): {} {
-		return JSON.stringify({ ...this }, (key, value) => {
-			// remove non-persistent data
-			if (key.startsWith('__') || this.metaData.attributes.isNonPersistent[key] === true) {
-				return undefined;
-			}
-
-			if (this.fieldRequired[key] && this.isNull(key as any)) {
-				throw new AttributeRequiredException(key);
-			}
-			return value;
-		});
-	}
-
-	/**
 	 * Marks the entity to be deleted.  This doesn't persist to the back end until .save() is called
 	 */
 	public delete(): void {
@@ -197,6 +179,9 @@ export class Entity {
 	 * @returns
 	 */
 	public isFieldReadonly<K extends keyof this>(attribute: K): boolean {
+		if (this.isReadonly) {
+			return true;
+		}
 		return this.onFieldReadonly(attribute as string, this.fieldReadonly[attribute]);
 	}
 
@@ -263,10 +248,10 @@ export class Entity {
 	 * @param attribute
 	 * @param readonly
 	 */
-	public setFieldReadonly(attribute: string | string[], readonly: boolean): void {
+	public setFieldReadonly<K extends keyof this>(attribute: K | K[], readonly: boolean): void {
 		if (Array.isArray(attribute)) {
 			for (const attr of attribute) {
-				this.metaData.attributes.isReadonly[attr] = readonly;
+				this.metaData.attributes.isReadonly[attr as string] = readonly;
 			}
 		} else {
 			this.metaData.attributes.isReadonly[attribute as string] = readonly;
@@ -278,13 +263,28 @@ export class Entity {
 	 * @param attribute
 	 * @param required
 	 */
-	public setFieldRequired(attribute: string | string[], required: boolean): void {
+	public setFieldRequired<K extends keyof this>(attribute: K | K[], required: boolean): void {
 		if (Array.isArray(attribute)) {
 			for (const attr of attribute) {
-				this.metaData.attributes.isRequired[attr] = required;
+				this.metaData.attributes.isRequired[attr as string] = required;
 			}
 		} else {
 			this.metaData.attributes.isRequired[attribute as string] = required;
+		}
+	}
+
+	/**
+	 * Set attribute to hidden
+	 * @param attribute
+	 * @param readonly
+	 */
+	public setFieldHidden<K extends keyof this>(attribute: K | K[], hidden: boolean): void {
+		if (Array.isArray(attribute)) {
+			for (const attr of attribute) {
+				this.metaData.attributes.isHidden[attr as string] = hidden;
+			}
+		} else {
+			this.metaData.attributes.isHidden[attribute as string] = hidden;
 		}
 	}
 
@@ -466,6 +466,35 @@ export class Entity {
 	}
 
 	/**
+	 * Validate entity data including non-persistent data.  Throws an exception if fails
+	 */
+	public validate(): void {
+		if (this.toBeSaved === true) {
+			Object.keys({ ...this }).forEach((key) => {
+				if (this.fieldRequired[key] && this.isNull(key as any)) {
+					throw new AttributeRequiredException(key);
+				}
+			});
+		}
+	}
+
+	/**
+	 * DTO object
+	 * @returns
+	 */
+	public get asData(): {} {
+		this.validate();
+
+		return JSON.stringify({ ...this }, (key, value) => {
+			// remove non-persistent data
+			if (key.startsWith('__') || this.metaData.attributes.isNonPersistent[key] === true) {
+				return undefined;
+			}
+			return value;
+		});
+	}
+
+	/**
 	 * Register attribute validators
 	 * @param name Register a unique name for a validator function
 	 * @param property Attribute name to register
@@ -561,7 +590,7 @@ export class Entity {
 	 * @param attribute
 	 * @param value
 	 */
-	protected onAfterChange(attribute: string, value: any): void {
+	protected onAfterChange(attribute: string): void {
 		return;
 	}
 
@@ -631,8 +660,8 @@ export class Entity {
 	 * @param attribute
 	 * @param value
 	 */
-	private afterChange(attribute: string, value: any): void {
-		return this.onAfterChange(attribute, value);
+	private afterChange(attribute: string): void {
+		return this.onAfterChange(attribute);
 	}
 
 	/**
@@ -652,7 +681,7 @@ export class Entity {
 
 		this.setFieldModified(attribute, true);
 
-		this.afterChange(attribute, (this as any)[attribute]);
+		this.afterChange(attribute);
 	}
 
 	/**
