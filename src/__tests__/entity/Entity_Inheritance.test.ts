@@ -54,7 +54,7 @@ class User extends Entity {
 				return value;
 			},
 		};
-		const func = keys[attribute];
+		const func = (keys as any)[attribute];
 		return func ? func() : value;
 	}
 
@@ -82,7 +82,7 @@ class User_2 extends User {
 				return super.onBeforeChange(attribute, value);
 			},
 		};
-		const func = keys[attribute];
+		const func = (keys as any)[attribute];
 		return func ? func() : value;
 	}
 }

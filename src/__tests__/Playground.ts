@@ -1,6 +1,6 @@
 import { EntitySet, Entity, EntityAttributes, FieldAccess } from '../entity';
 import { AttributeReadonlyException, AttributeRequiredException } from '../exceptions';
-import { AttributeConfig, NonPersistentAttribute, PrimaryKey, Readonly, Required, ValidatorJS } from '../decorators';
+import { AttributeConfig, NonPersistent, PrimaryKey, Readonly, Required, ValidatorJS } from '../decorators';
 
 const data = [
 	{
@@ -98,6 +98,39 @@ describe('Playground', () => {
 		const user = new Gamer(userData);
 		user.FIRSTNAME = "Jane";
 		expect(user.FIRSTNAME).toBe("GI Jane is awesome!");
-		console.log(user.asData);
+		//console.log(user.asData);
+	});
+
+
+	test('Used to run single test without running every test :)', () => {
+		// const entitySet: UserSet = new UserSet({ data: data, isReadonly: false, appName: 'USERAPP' });
+		// const entity: User = entitySet[0];
+
+		const userData = {
+			"USERID": "1",
+			"FIRSTNAME": "John",
+			"LASTNAME": "Smith",
+			"BIRTHDAY": new Date()
+		}
+
+		class User extends Entity {			
+			USERID!:string;
+			@Readonly
+			FIRSTNAME!:string;
+			LASTNAME!:string;
+			BIRTHDAY!:Date;
+		
+			protected onFieldReadonly(attribute: string, value: boolean): boolean {		
+				if (attribute === 'FIRSTNAME' && this.USERID == '1') {
+					// override logic of readonly for this field
+					return false;
+				}
+
+				return value;
+			}
+		}
+		
+		const user = new User(userData);
+		expect(user.isFieldReadonly('FIRSTNAME')).toBe(false);
 	});
 });

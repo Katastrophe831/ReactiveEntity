@@ -5,7 +5,7 @@ import {
 	AttributeRequiredException,
 	EntityReadonlyException,
 } from '../../exceptions';
-import { NonPersistentAttribute, PrimaryKey, Readonly, Required, ValidatorJS } from '../../decorators';
+import { NonPersistent, PrimaryKey, Readonly, Required, ValidatorJS } from '../../decorators';
 
 const data = [
 	{
@@ -99,7 +99,7 @@ describe('Entity Tests', () => {
 						return value;
 					},
 				};
-				const func = keys[attribute];
+				const func = (keys as any)[attribute];
 				return func ? func() : value;
 			}
 		}
@@ -239,7 +239,7 @@ describe('Entity Tests', () => {
 						this['READONLY'] = 'SET INTERNALLY';
 					},
 				};
-				const func = keys[attribute];
+				const func = (keys as any)[attribute];
 				func ? func() : null;
 			}
 		}
@@ -255,17 +255,17 @@ describe('Entity Tests', () => {
 
 	test('dynamic readonly/hidden fields', () => {
 		class UserTest extends User {
-			@NonPersistentAttribute
+			@NonPersistent
 			public NON_PERSISTENT_FIELD!: string;
 
-			@NonPersistentAttribute
+			@NonPersistent
 			public DATE_ISREQUIRED!: number;
 
 			protected onFieldReadonly(attribute: string, value: boolean): boolean {
 				const keys: EntityAttributes<this> = {
-					DATE: () => this.DATE_ISREQUIRED === 1,
+					DATE: ()  => this.DATE_ISREQUIRED === 1,
 				};
-				const func = keys[attribute];
+				const func = (keys as any)[attribute];
 				return func ? func() : value;
 			}
 
@@ -273,7 +273,7 @@ describe('Entity Tests', () => {
 				const keys: EntityAttributes<this> = {
 					DATE: () => this.DATE_ISREQUIRED === 1,
 				};
-				const func = keys[attribute];
+				const func = (keys as any)[attribute];
 				return func ? func() : value;
 			}
 		}
@@ -289,10 +289,10 @@ describe('Entity Tests', () => {
 	test('hidden fields', () => {
 		/* 
 		class UserTest extends User {
-			@NonPersistentAttribute
+			@NonPersistent
 			public NON_PERSISTENT_FIELD!: string;
 
-			@NonPersistentAttribute
+			@NonPersistent
 			public DATE_ISREQUIRED!: number;
 
 			protected onFieldReadonly(attribute: string, value: boolean): boolean {
@@ -395,7 +395,7 @@ describe('Entity Tests', () => {
 						this.setFieldRequired('USERID', true);
 					},
 				};
-				const func = keys[attribute];
+				const func = (keys as any)[attribute];
 				func ? func() : null;
 			}
 		}
@@ -409,7 +409,7 @@ describe('Entity Tests', () => {
 
 	test('Non persistent fields', () => {
 		class UserTest extends User {
-			@NonPersistentAttribute
+			@NonPersistent
 			public NON_PERSISTENT_FIELD!: string;
 		}
 

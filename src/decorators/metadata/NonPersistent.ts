@@ -1,5 +1,5 @@
 import { entityMetaDataWrapper } from './entityMetaDataWrapper';
 
-export const NonPersistentAttribute = (target: any, member: string) => {
+export const NonPersistent = (target: any, member: string) => {
 	entityMetaDataWrapper(target, 'isNonPersistent', member, true);
 };

@@ -3,7 +3,7 @@ import { Entity } from '.';
 export type EntityType = new (args?: EntityArgs) => Entity;
 
 export type EntityAttributes<T> = {
-	[P in keyof T as string]?: () => any;
+	[P in keyof T]?: () => any;
 };
 
 export type FieldMessage = { [key: string]: EntityMessage };
