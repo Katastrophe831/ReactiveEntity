@@ -78,10 +78,14 @@ console.log(user.isFieldModified('FIRSTNAME')) // true
 ```
 # Readonly / Required Fields
 
-> .setFieldRequired(attribute: string | string[], required: boolean): void
-
 ### Mark fields required
 
+API
+```typescript
+.setFieldRequired(attribute: string | string[], required: boolean): void
+```
+
+Example:
 ```typescript
 user.setFieldRequired('FIRSTNAME', true);
 user.isFieldRequired('FIRSTNAME') // true
@@ -91,10 +95,13 @@ user.FIRSTNAME = null;
 user.validate(); // throws exception 'Attribute NAME is required'
 ```
 
-> .setFieldReadonly(attribute: string | string[], readonly: boolean): void
-
 ### Mark fields readonly
 
+```typescript
+.setFieldReadonly(attribute: string | string[], readonly: boolean): void
+```
+
+Example:
 ```typescript
 user.setFieldReadonly('FIRSTNAME', true);
 user.isFieldReadonly('FIRSTNAME') // true
@@ -110,17 +117,18 @@ user.isFieldReadonly('FIRSTNAME') // true
 ```
 ### Mark whole entity as readonly
 
-> .setReadonly(isReadonly: boolean): void
+```typescript
+.setReadonly(isReadonly: boolean): void
+```
 
+Example:
 ```typescript
 user.setReadonly(true);
 user.FIRSTNAME = 'Jane'; // throws exception 'Entity User is readonly'
 ```
 # Select / Unselect
 
-> .select();  
-> .unselect();
-
+Example:
 ```typescript
 user.select();
 user.isSelected; // true
@@ -130,9 +138,6 @@ user.isSelected; // false
 # Delete / Undelete
 
 ### This is a non-desctructive action.  Only sets the meta data as 'to be deleted' which can be used to send to your API service to determine what to do with that information
-
-> .delete();  
-> .undelete();
 
 ```typescript
 user.delete();
@@ -147,8 +152,11 @@ There are events to handle 'beforeChange' and 'afterChange' of field values.
 
 ### Before Change
 
-> protected onBeforeChange(attribute: string, value: any): any { }
->> **<u>Note</u>: this returns 'any'.  Be sure to always return a value.
+```typescript
+protected onBeforeChange(attribute: string, value: any): any { }
+```
+
+> **<u>Note</u>: this returns **'any'**.  Be sure to always return a value.
 
 ```typescript
 class User extends Entity {
@@ -176,9 +184,12 @@ console.log(user.FIRSTNAME) // Jane is awesome
 
 ### After Change
 
-> protected onAfterChange(attribute: string, value: any): void { }
->> **<u>Note</u>: This returns a void as this event is run 'after' the value has been validated and set on the entity
+```typescript
+protected onAfterChange(attribute: string, value: any): void { }
+```
+> **<u>Note</u>: This returns a **'void'** as this event is run 'after' the value has been validated and sucessfully set on the entity
 
+Example:
 ```typescript
 class User extends Entity {
     USERID!:string;
@@ -194,6 +205,10 @@ class User extends Entity {
         }
     }
 }
+
+user.isFieldRequired('LASTNAME'); // false
+user.FIRSTNAME = 'Joe';
+user.isFieldRequired('LASTNAME'); // true
 ```
 
 # Field Validations
@@ -202,7 +217,37 @@ class User extends Entity {
 
 There is built in support for [ValidatorJS](https://github.com/mikeerickson/validatorjs) using a custom built decorator.  ValidatorJS has a bunch of validations that you can use out of the box.  If you can't find any that supports what you need, you can always roll your own decorator.  
 
-Another way to run your own validations, is to intercept the event handlers and customize according to your business rules.
+Another way to run your own validations, is to intercept the event handlers and customize according to your business rules by intercepting the [event handlers](#field-change-event-handling)
+
+> The flow of validation and setting of the value is as follows:  
+> -> Set Value -> Decorator Validation -> onBeforeChange() -> onAfterChange()
+
+### Decorator List
+
+* Readonly
+* Required
+* [NonPersistent](#non-persistent-fields)
+* ValidatorJS (see API [here](https://github.com/mikeerickson/validatorjs))
+* PrimaryKey
+
+### Readonly Decorator
+
+```typescript
+class User extends Entity {
+    @Readonly
+    USERID!:string;
+    FIRSTNAME!:string;
+    LASTNAME!:string;
+    BIRTHDAY!:Date;
+
+    protected onBeforeChange(attribute: string): void {        
+        // BEFORE change is not triggered here for USERID field as it is declared as readonly which fails validation first
+    }
+}
+
+user.isFieldReadonly('USERID'); // true
+user.USERID = 'Joe'; // Throws readonly exception
+```
 
 # Field Exception Handling
 
