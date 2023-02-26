@@ -141,12 +141,8 @@ public setFieldHidden(attribute: string | string[], required: boolean): void
 
 Example:
 ```typescript
-user.setFieldRequired('FIRSTNAME', true);
-user.isFieldRequired('FIRSTNAME') // true
-
-user.FIRSTNAME = null;
-
-user.validate(); // throws exception 'Attribute NAME is required'
+user.setFieldHidden('FIRSTNAME', true);
+user.isFieldHidden('FIRSTNAME') // true
 ```
 
 # Select / Unselect
