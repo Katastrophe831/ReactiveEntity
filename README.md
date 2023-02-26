@@ -409,7 +409,7 @@ class User extends Entity {
 }
 
 
-user.asData; // Validates the data and returns your DTO
+user.asData; // Validates the data and returns your DTO, will remove 'CONFIRM_PASSWORD' from DTO model
 ```
 The result will be returned as an anemic data model:
 
