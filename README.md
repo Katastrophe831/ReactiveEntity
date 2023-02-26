@@ -58,11 +58,11 @@ All of the business logic can be contained within the Entity and your entities c
 * [Select / Unselect](#select--unselect)
 * [Delete / Undelete](#delete--undelete)
 * [Field validations](#field-validations)
-* [Field exception handling](#field-exception-handling)
+* [Decorators](#decorators)
 * [Field change event handlers](#field-change-event-handling)
 * [Non-Persistent fields](#non-persistent-fields)
 * [Inheritance](#inheritance)
-* [Decorators](#decorators)
+* [Field exception handling](#field-exception-handling)
 
 # Internal Change Tracking
 
@@ -115,6 +115,7 @@ user.FIRSTNAME = null; // throws exception 'Attribute NAME is readonly'
 user.setFieldReadonly(['FIRSTNAME', 'LASTNAME'], true);
 user.isFieldReadonly('FIRSTNAME') // true
 ```
+
 ### Mark whole entity as readonly
 
 ```typescript
@@ -126,6 +127,28 @@ Example:
 user.setReadonly(true);
 user.FIRSTNAME = 'Jane'; // throws exception 'Entity User is readonly'
 ```
+
+# Hidden fields
+
+### Mark fields hidden
+
+This is great for UI data restrictions, where you can hide data when using the same entity model but for different modules in your application.
+
+API
+```typescript
+public setFieldHidden(attribute: string | string[], required: boolean): void
+```
+
+Example:
+```typescript
+user.setFieldRequired('FIRSTNAME', true);
+user.isFieldRequired('FIRSTNAME') // true
+
+user.FIRSTNAME = null;
+
+user.validate(); // throws exception 'Attribute NAME is required'
+```
+
 # Select / Unselect
 
 Example:
@@ -148,7 +171,15 @@ user.toBeDeleted; // false
 
 # Field Change Event Handling
 
-There are events to handle 'beforeChange' and 'afterChange' of field values.
+There are events to which you can intercept when working with setting values.
+
+### Event Listeners
+
+* onBeforeChange
+* onAfterChange
+* onFieldReadonly
+* onFieldRequired
+* onFieldHidden
 
 ### Before Change
 
@@ -215,20 +246,39 @@ user.isFieldRequired('LASTNAME'); // true
 
 > See also [Decorators](#decorators)
 
-There is built in support for [ValidatorJS](https://github.com/mikeerickson/validatorjs) using a custom built decorator.  ValidatorJS has a bunch of validations that you can use out of the box.  If you can't find any that supports what you need, you can always roll your own decorator.  
+There is built in support for [ValidatorJS](https://github.com/mikeerickson/validatorjs) using a @ValidatorJS decorator.  ValidatorJS has a bunch of validations that you can use out of the box.  If you can't find any that supports what you need, you can always roll your own decorator.  
 
-Another way to run your own validations, is to intercept the event handlers and customize according to your business rules by intercepting the [event handlers](#field-change-event-handling)
+Another way to run your own validations, is to intercept the event handlers and customize the logic according to your business rules by intercepting the [event handlers](#field-change-event-handling)
 
 > The flow of validation and setting of the value is as follows:  
 > -> Set Value -> Decorator Validation -> onBeforeChange() -> set entity -> onAfterChange()
 
+# Decorators
+
 ### Decorator List
 
-* Readonly
-* Required
-* [NonPersistent](#non-persistent-fields)
-* ValidatorJS (see API [here](https://github.com/mikeerickson/validatorjs))
-* PrimaryKey
+* [PrimaryKey](#primarykey-decorator)
+* [Readonly](#readonly-decorator)
+* [Required](#required-decorator)
+* [NonPersistent](#nonpersistent-decorator)
+* [ValidatorJS](#validatorjs-decorator)
+
+### PrimaryKey Decorator
+
+Used to determine which attribute is the primary key of the object.  Only one PK can be defined.
+
+```typescript
+class User extends Entity {
+    @PrimaryKey
+    USERID!:string;
+    FIRSTNAME!:string;
+    LASTNAME!:string;
+    BIRTHDAY!:Date;
+}
+
+user.primaryKeyName; // "USERID"
+user.primaryKeyValue; // "1"
+```
 
 ### Readonly Decorator
 
@@ -239,20 +289,135 @@ class User extends Entity {
     FIRSTNAME!:string;
     LASTNAME!:string;
     BIRTHDAY!:Date;
-
-    protected onBeforeChange(attribute: string): void {        
-        // BEFORE change is not triggered here for USERID field as it is declared as readonly which fails validation first
-    }
 }
 
 user.isFieldReadonly('USERID'); // true
 user.USERID = 'Joe'; // Throws readonly exception
 ```
 
-# Field Exception Handling
+### Required Decorator
 
-# Non-Persistent Fields
+```typescript
+class User extends Entity {
+    @Required
+    USERID!:string;
+    FIRSTNAME!:string;
+    LASTNAME!:string;
+    BIRTHDAY!:Date;
+}
+
+user.isFieldRequired('USERID'); // true
+user.USERID = null;
+user.validate(); // Throws required field exception
+```
+
+### NonPersistent Decorator
+
+Mark fields as non-persistent.  This type of field will act as all other fields where you can apply business logic to it.  Its use case comes when you want to transform your rich domain model back to a JSON or DTO (Data Transfer Object) to send back to your data store.
+
+```typescript
+class User extends Entity {
+    @Required
+    USERID!:string;
+    FIRSTNAME!:string;
+    LASTNAME!:string;
+    BIRTHDAY!:Date;
+
+    @NonPersistent
+    CONFIRM_PASSWORD!:string;    
+}
+
+user.asData; // Validates the data and returns your DTO
+```
+The result will be returned as an anemic data model:
+
+```json
+{
+    "USERID": "1",
+    "FIRSTNAME": "John",
+    "LASTNAME": "Smith",
+    "BIRTHDAY": "2010-02-26T00:00:00.000Z"
+}
+```
+
+### ValidatorJS Decorator
+
+Support for ValidatorJS (see complete rules [here](https://github.com/mikeerickson/validatorjs))
+
+Aside from the built-in @Required decorator, you can use ValidatorJS rules to handle additional validation
+
+```typescript
+class User extends Entity {
+    @ValidatorJS({ rules: 'required' })
+    USERID!:string;
+    FIRSTNAME!:string;
+    LASTNAME!:string;    
+    PASSWORD!:string;
+
+    @NonPersistent
+    @ValidatorJS({ rules: 'required|same:PASSWORD' })
+    CONFIRM_PASSWORD!:string;
+
+    @ValidatorJS({ rules: 'required|email' })
+    EMAIL!:string;
+}
+
+user.isFieldRequired('USERID'); // true
+user.USERID = null; // throws required field exception
+```
+
+The main difference between @Required decorator and @ValidatorJS "required" rule, is that the ValidatorJS is executed when setting the field.  Whereas, the @Required decorator will only throw the exception when you run 'validate()'.
+
+```typescript
+user.validate(); // Throws required field exception
+```
 
 # Inheritance
 
-# Decorators
+In enterprise applications there are times when you build out of the box base models and then extend them on a per-client requierment.  Therefore, multiple inheritance is a forethought during the inital design.
+
+```typescript
+class User extends Entity {
+    @ValidatorJS({ rules: 'required' })
+    USERID!:string;
+    FIRSTNAME!:string;
+    LASTNAME!:string;    
+    PASSWORD!:string;
+
+    @NonPersistent
+    @ValidatorJS({ rules: 'required|same:PASSWORD' })
+    CONFIRM_PASSWORD!:string;
+
+    @ValidatorJS({ rules: 'required|email' })
+    EMAIL!:string;
+
+    // intercepts the value BEFORE it is set on the entity
+    protected onBeforeChange(attribute: string, value: any): any {        
+        if (attribute === 'FIRSTNAME') {
+            return value += ' is awesome!';
+        }
+        // Be sure to always return a value
+        return value;
+    }    
+}
+
+class Gamer extends User {
+    @Required
+    GAMERTAG!:string;
+
+    // intercepts the value BEFORE it is set on the entity
+    protected onBeforeChange(attribute: string, value: any): any {        
+        if (attribute === 'FIRSTNAME' && value === 'Jane') {
+            value = 'GI ' + value;
+            return super.onBeforeChange(attribute, value);
+        }
+        // Be sure to always return a value
+        return value;
+    }
+}
+
+user.FIRSTNAME = "Jane";
+console.log(user.FIRSTNAME); // GI Jane is awesome!
+```
+
+# Field Exception Handling
