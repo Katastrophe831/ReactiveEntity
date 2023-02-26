@@ -68,7 +68,7 @@ All of the business logic can be contained within the Entity and your entities c
 
 ### Detecting and Marking Changes
 
-### When an entity is modified, there are entity and field level flags to mark them as being modified.
+> When an entity is modified, there are entity and field level flags to mark them as being modified.
 
 ```typescript
 user.FIRSTNAME = 'Jane';
@@ -82,7 +82,7 @@ console.log(user.isFieldModified('FIRSTNAME')) // true
 
 API
 ```typescript
-.setFieldRequired(attribute: string | string[], required: boolean): void
+public setFieldRequired(attribute: string | string[], required: boolean): void
 ```
 
 Example:
@@ -98,7 +98,7 @@ user.validate(); // throws exception 'Attribute NAME is required'
 ### Mark fields readonly
 
 ```typescript
-.setFieldReadonly(attribute: string | string[], readonly: boolean): void
+public setFieldReadonly(attribute: string | string[], readonly: boolean): void
 ```
 
 Example:
@@ -118,7 +118,7 @@ user.isFieldReadonly('FIRSTNAME') // true
 ### Mark whole entity as readonly
 
 ```typescript
-.setReadonly(isReadonly: boolean): void
+public setReadonly(isReadonly: boolean): void
 ```
 
 Example:
@@ -137,7 +137,7 @@ user.isSelected; // false
 ```
 # Delete / Undelete
 
-### This is a non-desctructive action.  Only sets the meta data as 'to be deleted' which can be used to send to your API service to determine what to do with that information
+> This is a non-desctructive action.  Only sets the meta data as 'to be deleted' which can be used to send to your API service to determine what to do with that information
 
 ```typescript
 user.delete();
@@ -220,7 +220,7 @@ There is built in support for [ValidatorJS](https://github.com/mikeerickson/vali
 Another way to run your own validations, is to intercept the event handlers and customize according to your business rules by intercepting the [event handlers](#field-change-event-handling)
 
 > The flow of validation and setting of the value is as follows:  
-> -> Set Value -> Decorator Validation -> onBeforeChange() -> onAfterChange()
+> -> Set Value -> Decorator Validation -> onBeforeChange() -> set entity -> onAfterChange()
 
 ### Decorator List
 
