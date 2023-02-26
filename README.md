@@ -6,7 +6,7 @@ There is a lot of discussion around Anemic Models vs. Rich Domain Models in Doma
 
 # Goals
 
-The main goal of this project is to decouple your domain model from your backend using JSON data as your interface.  JSON (anemic) data is king!  There is built in typesafe checks but the main focus is to still be flexible when working with JSON data.  Your backend could be MSSQL, Mongo or even a REST API service. As long as you have a JSON data model, you can wrap it a ReactiveEntity with domain business logic. Then build reactive front end applications along with field validations and convert your rich domain models back to <u>**validated**</u> JSON data to pass back to your persistent data store.  No more need for front end reactive forms and backend DTOs.
+The main goal of this project is to decouple your domain model from your backend using JSON data as your interface.  JSON (anemic) data is king!  There is built in typesafe checks but the main focus is to still be flexible when working with JSON data.  Your backend could be MSSQL, Mongo or even a REST API service. As long as you have a JSON data model, you can wrap it with a ReactiveEntity and add custom domain business logic. Then build reactive front end applications along with field validations and convert your rich domain models back to <u>**validated**</u> JSON data to pass back to your persistent data store.  No more need for front end Angular reactive forms and backend DTOs.
 
 # Why use ReactiveEntity?
 
@@ -278,18 +278,18 @@ class User extends Entity {
     BIRTHDAY!:Date;
 
     protected onFieldRequired(attribute: string, value: boolean): boolean {
-        console.log(value); // Current state of readonly for this field
+        console.log(value); // true; -- Current state of readonly for this field
 
         if (attribute === 'FIRSTNAME' && this.USERID == '1') {
             // override logic of readonly for this field
-            return true;
+            return false;
         }
 
         return value;
     }
 }
 
-user.isFieldRequired('FIRSTNAME'); // true
+user.isFieldRequired('FIRSTNAME'); // false, even using the @Required decorator
 ```
 
 ### On Field Hidden
@@ -324,7 +324,7 @@ There is built in support for [ValidatorJS](https://github.com/mikeerickson/vali
 Another way to run your own validations, is to intercept the event handlers and customize the logic according to your business rules by intercepting the [event handlers](#field-change-event-handling)
 
 > The flow of validation and setting of the value is as follows:  
-> -> Set Value -> Decorator Validation -> onBeforeChange() -> set entity -> onAfterChange()
+> Entity -> Set Value -> Decorator Validation -> onBeforeChange() -> set entity -> onAfterChange()
 
 # Decorators
 
