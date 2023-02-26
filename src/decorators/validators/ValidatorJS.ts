@@ -8,11 +8,13 @@ export interface ValidatorJSConfig extends AttributeValidator {
 }
 
 export const ValidatorJS = (config: ValidatorJSConfig) => (target: Entity, member: string) => {
+	const uniqueName = 'ValidatorJS';
+
 	const args = {
 		[member]: config.rules,
 	};
 
-	target.registerAttributeValidator('ValidatorJS', member, {
+	target.registerAttributeValidator(uniqueName, member, {
 		args, // This will be passed back to the callback function
 		callback,
 	});
