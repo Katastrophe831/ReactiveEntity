@@ -175,11 +175,11 @@ There are events to which you can intercept when working with setting values.
 
 ### Event Listeners
 
-* onBeforeChange
-* onAfterChange
-* onFieldReadonly
-* onFieldRequired
-* onFieldHidden
+* [onBeforeChange](#before-change)
+* [onAfterChange](#after-change)
+* [onFieldReadonly](#on-field-readonly)
+* [onFieldRequired](#on-field-required)
+* [onFieldHidden](#on-field-hidden)
 
 ### Before Change
 
@@ -241,7 +241,80 @@ user.isFieldRequired('LASTNAME'); // false
 user.FIRSTNAME = 'Joe';
 user.isFieldRequired('LASTNAME'); // true
 ```
+### On Field Readonly
 
+Example:
+```typescript
+class User extends Entity {
+    USERID!:string;
+    @Readonly
+    FIRSTNAME!:string;
+    LASTNAME!:string;
+    BIRTHDAY!:Date;
+
+    protected onFieldReadonly(attribute: string, value: boolean): boolean {
+        console.log(value); // Current state of readonly for this field
+
+        if (attribute === 'FIRSTNAME' && this.USERID == '1') {
+            // override logic of readonly for this field
+            return false;
+        }
+        return value;
+    }
+}
+
+user.isFieldReadonly('FIRSTNAME'); // false, even using the @Readonly decorator
+```
+
+### On Field Required
+
+Example:
+```typescript
+class User extends Entity {    
+    USERID!:string;
+    @Required
+    FIRSTNAME!:string;
+    LASTNAME!:string;
+    BIRTHDAY!:Date;
+
+    protected onFieldRequired(attribute: string, value: boolean): boolean {
+        console.log(value); // Current state of readonly for this field
+
+        if (attribute === 'FIRSTNAME' && this.USERID == '1') {
+            // override logic of readonly for this field
+            return true;
+        }
+
+        return value;
+    }
+}
+
+user.isFieldRequired('FIRSTNAME'); // true
+```
+
+### On Field Hidden
+
+Example:
+```typescript
+class User extends Entity {
+    USERID!:string;
+    FIRSTNAME!:string;
+    LASTNAME!:string;
+    BIRTHDAY!:Date;
+
+    protected onFieldHidden(attribute: string, value: boolean): boolean {
+        console.log(value); // Current state of readonly for this field
+
+        if (attribute === 'FIRSTNAME' && this.USERID == '1') {
+            // override logic of readonly for this field
+            return true;
+        }
+
+        return value;
+    }
+}
+user.isFieldHidden('FIRSTNAME'); // true
+```
 # Field Validations
 
 > See also [Decorators](#decorators)
@@ -323,9 +396,21 @@ class User extends Entity {
     LASTNAME!:string;
     BIRTHDAY!:Date;
 
+    @Readonly
+    @NonPersistent
+    DISPLAYNAME!:string;
+
     @NonPersistent
     CONFIRM_PASSWORD!:string;    
+
+    // intercepts the value AFTER it is set on the entity
+    protected onAfterChange(attribute: string): void {        
+        if (attribute === 'FIRSTNAME' || attribute === 'LASTNAME') {
+            this.DISPLAYNAME = this.FIRSTNAME + ' ' + this.LASTNAME;
+        }
+    }
 }
+
 
 user.asData; // Validates the data and returns your DTO
 ```
