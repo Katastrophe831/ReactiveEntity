@@ -182,7 +182,7 @@ export class Entity {
 		if (this.isReadonly) {
 			return true;
 		}
-		return this.onFieldReadonly(attribute as string, this.fieldReadonly[attribute]);
+		return this.onFieldReadonly(attribute as string, this.fieldReadonly[attribute] ?? false);
 	}
 
 	/**
@@ -191,7 +191,7 @@ export class Entity {
 	 * @returns
 	 */
 	public isFieldRequired<K extends keyof this>(attribute: K): boolean {
-		return this.onFieldRequired(attribute as string, this.fieldRequired[attribute]);
+		return this.onFieldRequired(attribute as string, this.fieldRequired[attribute] ?? false);
 	}
 
 	/**
@@ -200,7 +200,7 @@ export class Entity {
 	 * @returns
 	 */
 	public isFieldHidden<K extends keyof this>(attribute: K): boolean {
-		return this.onFieldHidden(attribute as string, this.fieldHidden[attribute]);
+		return this.onFieldHidden(attribute as string, this.fieldHidden[attribute] ?? false);
 	}
 
 	/**
