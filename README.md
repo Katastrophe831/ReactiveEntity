@@ -147,7 +147,6 @@ user.isFieldHidden('FIRSTNAME') // true
 
 # Select / Unselect
 
-Example:
 ```typescript
 user.select();
 user.isSelected; // true
@@ -179,12 +178,14 @@ There are events to which you can intercept when working with setting values.
 
 ### Before Change
 
+API
 ```typescript
 protected onBeforeChange(attribute: string, value: any): any { }
 ```
 
 > **<u>Note</u>: this returns **'any'**.  Be sure to always return a value.
 
+Example:
 ```typescript
 class User extends Entity {
     USERID!:string;
@@ -502,3 +503,16 @@ console.log(user.FIRSTNAME); // GI Jane is awesome!
 ```
 
 # Field Exception Handling
+
+# Converting to DTOs (Data Transfer Objects)
+
+Building rich domain models with business logic and non-persistent fields is great, but eventually the models need to be converted to anemic models to be passed to a REST service or some other back end API.
+
+API
+```typescript
+// JSON.stringify() the model but also runs validation and throws any exceptions if it fails
+const persistedData = user.asData; 
+
+// Send to your back end
+dataStore.save(persistedData);
+```
