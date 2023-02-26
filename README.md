@@ -408,8 +408,7 @@ class User extends Entity {
     }
 }
 
-
-user.asData; // Validates the data and returns your DTO, will remove 'CONFIRM_PASSWORD' from DTO model
+user.asData; // Validates the data and converts to a DTO, will remove 'CONFIRM_PASSWORD' as it is non-persistent during the conversion, but doesn't remove it from the ReactiveEntity
 ```
 The result will be returned as an anemic data model:
 
