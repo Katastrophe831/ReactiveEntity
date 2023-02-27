@@ -1,5 +1,5 @@
-import { entityMetaDataWrapper } from './entityMetaDataWrapper';
+import { Entity } from '@ReactiveEntity';
 
-export const NonPersistent = (target: any, member: string) => {
-	entityMetaDataWrapper(target, 'isNonPersistent', member, true);
+export const NonPersistent = (target: Entity, member: string) => {
+	target.setFieldNonPersistent(member as any);
 };

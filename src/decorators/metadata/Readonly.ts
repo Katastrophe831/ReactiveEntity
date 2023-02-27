@@ -1,5 +1,5 @@
-import { entityMetaDataWrapper } from './entityMetaDataWrapper';
+import { Entity } from '@ReactiveEntity';
 
-export const Readonly = (target: any, member: string) => {
-	entityMetaDataWrapper(target, 'isReadonly', member, true);
+export const Readonly = (target: Entity, member: string) => {
+	target.setFieldReadonly(member as any, true);
 };

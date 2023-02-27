@@ -99,7 +99,7 @@ describe('Entity Tests', () => {
 						return value;
 					},
 				};
-				const func = (keys as any)[attribute];
+				const func = keys[attribute as keyof this];
 				return func ? func() : value;
 			}
 		}
@@ -119,8 +119,8 @@ describe('Entity Tests', () => {
 	test('To Be Saved - Field Access Modifiers', () => {
 		class UserTest extends User {
 			protected onBeforeChange(attribute: string, value: any): any {
-				switch(attribute){
-					case "NAME":
+				switch (attribute) {
+					case 'NAME':
 						if (value === 'test change') {
 							throw Error(value);
 						}
@@ -239,7 +239,7 @@ describe('Entity Tests', () => {
 						this['READONLY'] = 'SET INTERNALLY';
 					},
 				};
-				const func = (keys as any)[attribute];
+				const func = keys[attribute as keyof this];
 				func ? func() : null;
 			}
 		}
@@ -263,9 +263,9 @@ describe('Entity Tests', () => {
 
 			protected onFieldReadonly(attribute: string, value: boolean): boolean {
 				const keys: EntityAttributes<this> = {
-					DATE: ()  => this.DATE_ISREQUIRED === 1,
+					DATE: () => this.DATE_ISREQUIRED === 1,
 				};
-				const func = (keys as any)[attribute];
+				const func = keys[attribute as keyof this];
 				return func ? func() : value;
 			}
 
@@ -273,7 +273,7 @@ describe('Entity Tests', () => {
 				const keys: EntityAttributes<this> = {
 					DATE: () => this.DATE_ISREQUIRED === 1,
 				};
-				const func = (keys as any)[attribute];
+				const func = keys[attribute as keyof this];
 				return func ? func() : value;
 			}
 		}
@@ -359,7 +359,7 @@ describe('Entity Tests', () => {
 		expect(entity.isFieldRequired('NAME')).toBe(true);
 
 		entity.NAME = null;
-		expect(()=>entity.validate()).toThrowError('Attribute NAME is required');
+		expect(() => entity.validate()).toThrowError('Attribute NAME is required');
 
 		entity.setFieldRequired(['NAME', 'NUMTYPE'], true);
 		expect(entity.isFieldRequired('NAME')).toBe(true);
@@ -377,7 +377,7 @@ describe('Entity Tests', () => {
 		entity.setFieldReadonly('NAME', true);
 		expect(entity.isFieldReadonly('NAME')).toBe(true);
 
-		expect(()=>entity.NAME = null).toThrowError('Attribute NAME is readonly');
+		expect(() => (entity.NAME = null)).toThrowError('Attribute NAME is readonly');
 
 		entity.setFieldReadonly(['NAME', 'NUMTYPE'], true);
 		expect(entity.isFieldReadonly('NAME')).toBe(true);
@@ -395,7 +395,7 @@ describe('Entity Tests', () => {
 						this.setFieldRequired('USERID', true);
 					},
 				};
-				const func = (keys as any)[attribute];
+				const func = keys[attribute as keyof this];
 				func ? func() : null;
 			}
 		}

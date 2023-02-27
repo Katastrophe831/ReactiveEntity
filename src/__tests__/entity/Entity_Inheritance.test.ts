@@ -54,13 +54,13 @@ class User extends Entity {
 				return value;
 			},
 		};
-		const func = (keys as any)[attribute];
+		const func = keys[attribute as keyof this];
 		return func ? func() : value;
 	}
 
 	protected onAfterChange(attribute: string): void {
 		switch (attribute) {
-			case "NAME":
+			case 'NAME':
 				this.USERID = this.NAME;
 			default:
 		}
@@ -82,7 +82,7 @@ class User_2 extends User {
 				return super.onBeforeChange(attribute, value);
 			},
 		};
-		const func = (keys as any)[attribute];
+		const func = keys[attribute as keyof this];
 		return func ? func() : value;
 	}
 }

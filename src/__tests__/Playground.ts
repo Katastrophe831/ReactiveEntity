@@ -51,41 +51,41 @@ describe('Playground', () => {
 		// const entity: User = entitySet[0];
 
 		const userData = {
-			"USERID": "1",
-			"FIRSTNAME": "John",
-			"LASTNAME": "Smith",
-			"BIRTHDAY": new Date()
-		}
+			USERID: '1',
+			FIRSTNAME: 'John',
+			LASTNAME: 'Smith',
+			BIRTHDAY: new Date(),
+		};
 
 		class User extends Entity {
 			@ValidatorJS({ rules: 'required' })
-			USERID!:string;
-			FIRSTNAME!:string;
-			LASTNAME!:string;    
-			PASSWORD!:string;
-		
+			USERID!: string;
+			FIRSTNAME!: string;
+			LASTNAME!: string;
+			PASSWORD!: string;
+
 			@ValidatorJS({ rules: 'required|same:PASSWORD' })
-			CONFIRM_PASSWORD!:string;
-		
+			CONFIRM_PASSWORD!: string;
+
 			@ValidatorJS({ rules: 'required|email' })
-			EMAIL!:string;
-		
+			EMAIL!: string;
+
 			// intercepts the value BEFORE it is set on the entity
-			protected onBeforeChange(attribute: string, value: any): any {        
+			protected onBeforeChange(attribute: string, value: any): any {
 				if (attribute === 'FIRSTNAME') {
-					return value += ' is awesome!';
+					return (value += ' is awesome!');
 				}
 				// Be sure to always return a value
 				return value;
-			}    
+			}
 		}
-		
+
 		class Gamer extends User {
 			@Required
-			GAMERTAG!:string;
-		
+			GAMERTAG!: string;
+
 			// intercepts the value BEFORE it is set on the entity
-			protected onBeforeChange(attribute: string, value: any): any {        
+			protected onBeforeChange(attribute: string, value: any): any {
 				if (attribute === 'FIRSTNAME' && value === 'Jane') {
 					value = 'GI ' + value;
 					return super.onBeforeChange(attribute, value);
@@ -96,31 +96,30 @@ describe('Playground', () => {
 		}
 
 		const user = new Gamer(userData);
-		user.FIRSTNAME = "Jane";
-		expect(user.FIRSTNAME).toBe("GI Jane is awesome!");
+		user.FIRSTNAME = 'Jane';
+		expect(user.FIRSTNAME).toBe('GI Jane is awesome!');
 		//console.log(user.asData);
 	});
-
 
 	test('Used to run single test without running every test :)', () => {
 		// const entitySet: UserSet = new UserSet({ data: data, isReadonly: false, appName: 'USERAPP' });
 		// const entity: User = entitySet[0];
 
 		const userData = {
-			"USERID": "1",
-			"FIRSTNAME": "John",
-			"LASTNAME": "Smith",
-			"BIRTHDAY": new Date()
-		}
+			USERID: '1',
+			FIRSTNAME: 'John',
+			LASTNAME: 'Smith',
+			BIRTHDAY: new Date(),
+		};
 
-		class User extends Entity {			
-			USERID!:string;
+		class User extends Entity {
+			USERID!: string;
 			@Readonly
-			FIRSTNAME!:string;
-			LASTNAME!:string;
-			BIRTHDAY!:Date;
-		
-			protected onFieldReadonly(attribute: string, value: boolean): boolean {		
+			FIRSTNAME!: string;
+			LASTNAME!: string;
+			BIRTHDAY!: Date;
+
+			protected onFieldReadonly(attribute: string, value: boolean): boolean {
 				if (attribute === 'FIRSTNAME' && this.USERID == '1') {
 					// override logic of readonly for this field
 					return false;
@@ -129,7 +128,7 @@ describe('Playground', () => {
 				return value;
 			}
 		}
-		
+
 		const user = new User(userData);
 		expect(user.isFieldReadonly('FIRSTNAME')).toBe(false);
 	});

@@ -75,28 +75,18 @@ export class Entity {
 	}
 
 	/**
-	 * Get meta data
-	 */
-	public get metaData(): EntityMetaData {
-		if (!this.__METADATA) {
-			this.__METADATA = new EntityMetaData();
-		}
-		return this.__METADATA;
-	}
-
-	/**
 	 * Get primary key name
 	 */
 	public get primaryKeyName(): string {
-		const keys = Object.keys(this.metaData.attributes.primaryKey);
-		if (!!keys.length === false) {
+		const value = this.metaData.primaryKeyName;
+		if (value == null) {
 			throw new EntityException(
 				this.constructor.name,
 				'entity#primarykeynotfound',
 				'Primary key not defined for object {{0}}',
 			);
 		}
-		return keys[0];
+		return value;
 	}
 
 	/**
@@ -248,14 +238,8 @@ export class Entity {
 	 * @param attribute
 	 * @param readonly
 	 */
-	public setFieldReadonly<K extends keyof this>(attribute: K | K[], readonly: boolean): void {
-		if (Array.isArray(attribute)) {
-			for (const attr of attribute) {
-				this.metaData.attributes.isReadonly[attr as string] = readonly;
-			}
-		} else {
-			this.metaData.attributes.isReadonly[attribute as string] = readonly;
-		}
+	public setFieldReadonly<K extends keyof this>(attribute: K | K[], value: boolean): void {
+		this.metaData.setReadonlyFields(attribute as any, value);
 	}
 
 	/**
@@ -263,14 +247,8 @@ export class Entity {
 	 * @param attribute
 	 * @param required
 	 */
-	public setFieldRequired<K extends keyof this>(attribute: K | K[], required: boolean): void {
-		if (Array.isArray(attribute)) {
-			for (const attr of attribute) {
-				this.metaData.attributes.isRequired[attr as string] = required;
-			}
-		} else {
-			this.metaData.attributes.isRequired[attribute as string] = required;
-		}
+	public setFieldRequired<K extends keyof this>(attribute: K | K[], value: boolean): void {
+		this.metaData.setRequiredFields(attribute as any, value);
 	}
 
 	/**
@@ -278,14 +256,33 @@ export class Entity {
 	 * @param attribute
 	 * @param readonly
 	 */
-	public setFieldHidden<K extends keyof this>(attribute: K | K[], hidden: boolean): void {
-		if (Array.isArray(attribute)) {
-			for (const attr of attribute) {
-				this.metaData.attributes.isHidden[attr as string] = hidden;
-			}
-		} else {
-			this.metaData.attributes.isHidden[attribute as string] = hidden;
+	public setFieldHidden<K extends keyof this>(attribute: K | K[], value: boolean): void {
+		this.metaData.setHiddenFields(attribute as any, value);
+	}
+
+	/**
+	 * Set attribute to non persistent
+	 * @param attribute
+	 * @param hidden
+	 */
+	public setFieldNonPersistent<K extends keyof this>(attribute: K | K[]): void {
+		this.metaData.setNonPersistentFields(attribute as any);
+	}
+
+	/**
+	 * Set primary key name
+	 * @param attribute
+	 */
+	public setPrimaryKeyName<K extends keyof this>(attribute: K): void {
+		const value = this.metaData.primaryKeyName;
+		if (value !== null) {
+			throw new EntityException(
+				this.primaryKeyName,
+				'entity#primarykeyexists',
+				'Primary Key {{0}} already exists on this entity',
+			);
 		}
+		this.metaData.setPrimaryKeyName(attribute as string);
 	}
 
 	/**
@@ -512,6 +509,16 @@ export class Entity {
 		} else {
 			this.attributeValidators[name].push({ property, args: validator.args });
 		}
+	}
+
+	/**
+	 * Get meta data
+	 */
+	protected get metaData(): EntityMetaData {
+		if (!this.__METADATA) {
+			this.__METADATA = new EntityMetaData();
+		}
+		return this.__METADATA;
 	}
 
 	/**

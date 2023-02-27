@@ -1,5 +1,5 @@
-import { entityMetaDataWrapper } from './entityMetaDataWrapper';
+import { Entity } from '@ReactiveEntity';
 
-export const Required = (target: any, member: string) => {
-	entityMetaDataWrapper(target, 'isRequired', member, true);
+export const Required = (target: Entity, member: string) => {
+	target.setFieldRequired(member as any, true);
 };
