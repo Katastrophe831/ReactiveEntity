@@ -101,8 +101,9 @@ export class Entity {
 	 * @returns
 	 */
 	public get hasPrimaryKey(): boolean {
-		return !!Object.keys(this.metaData.attributes.primaryKey).length;
+		return this.metaData.primaryKeyName !== null;
 	}
+	
 	/**
 	 * Is readonly
 	 */
@@ -137,7 +138,7 @@ export class Entity {
 	 * Getter for all field messages
 	 */
 	public get fieldMessages(): FieldMessage {
-		return this.metaData.attributes.messages;
+		return this.metaData.fieldMessages;
 	}
 
 	/**
@@ -160,7 +161,7 @@ export class Entity {
 	 * @returns
 	 */
 	public isFieldModified<K extends keyof this>(attribute: K): boolean {
-		return this.fieldModified[attribute] ?? false;
+		return this.modifiedFields[attribute] ?? false;
 	}
 
 	/**
@@ -172,7 +173,7 @@ export class Entity {
 		if (this.isReadonly) {
 			return true;
 		}
-		return this.onFieldReadonly(attribute as string, this.fieldReadonly[attribute] ?? false);
+		return this.onFieldReadonly(attribute as string, this.readonlyFields[attribute] ?? false);
 	}
 
 	/**
@@ -181,7 +182,7 @@ export class Entity {
 	 * @returns
 	 */
 	public isFieldRequired<K extends keyof this>(attribute: K): boolean {
-		return this.onFieldRequired(attribute as string, this.fieldRequired[attribute] ?? false);
+		return this.onFieldRequired(attribute as string, this.requiredFields[attribute] ?? false);
 	}
 
 	/**
@@ -190,7 +191,7 @@ export class Entity {
 	 * @returns
 	 */
 	public isFieldHidden<K extends keyof this>(attribute: K): boolean {
-		return this.onFieldHidden(attribute as string, this.fieldHidden[attribute] ?? false);
+		return this.onFieldHidden(attribute as string, this.hiddenFields[attribute] ?? false);
 	}
 
 	/**
@@ -267,6 +268,14 @@ export class Entity {
 	 */
 	public setFieldNonPersistent<K extends keyof this>(attribute: K | K[]): void {
 		this.metaData.setNonPersistentFields(attribute as any);
+	}
+
+	/**
+	 * Register an attribute name
+	 * @param attribute 
+	 */
+	public registerAttributeName(attribute : string) : void {
+		this.metaData.registerAttributeName(attribute as any);
 	}
 
 	/**
@@ -406,7 +415,7 @@ export class Entity {
 	 * @param attribute
 	 */
 	public clearFieldMessage<K extends keyof this>(attribute: K) {
-		delete this.metaData.attributes.messages[attribute as any];
+		delete this.metaData.fieldMessages[attribute as any];
 	}
 
 	/**
@@ -468,7 +477,7 @@ export class Entity {
 	public validate(): void {
 		if (this.toBeSaved === true) {
 			Object.keys({ ...this }).forEach((key) => {
-				if (this.fieldRequired[key] && this.isNull(key as any)) {
+				if (this.requiredFields[key] && this.isNull(key as any)) {
 					throw new AttributeRequiredException(key);
 				}
 			});
@@ -484,7 +493,7 @@ export class Entity {
 
 		return JSON.stringify({ ...this }, (key, value) => {
 			// remove non-persistent data
-			if (key.startsWith('__') || this.metaData.attributes.isNonPersistent[key] === true) {
+			if (key.startsWith('__') || this.metaData.nonPersistentFields[key] === true) {
 				return undefined;
 			}
 			return value;
@@ -534,29 +543,29 @@ export class Entity {
 	/**
 	 * Getter for all required attributes
 	 */
-	protected get fieldRequired(): AttributeBooleanType {
-		return this.metaData.attributes.isRequired;
+	protected get requiredFields(): AttributeBooleanType {
+		return this.metaData.requiredFields;
 	}
 
 	/**
 	 * Getter for all modified attributes
 	 */
-	protected get fieldModified(): AttributeBooleanType {
-		return this.metaData.attributes.isModified;
+	protected get modifiedFields(): AttributeBooleanType {
+		return this.metaData.modifiedFields;
 	}
 
 	/**
 	 * Getter for all readonly attributes
 	 */
-	protected get fieldReadonly(): AttributeBooleanType {
-		return this.metaData.attributes.isReadonly;
+	protected get readonlyFields(): AttributeBooleanType {
+		return this.metaData.readonlyFields;
 	}
 
 	/**
 	 * Getter for all hidden attributes
 	 */
-	protected get fieldHidden(): AttributeBooleanType {
-		return this.metaData.attributes.isHidden;
+	protected get hiddenFields(): AttributeBooleanType {
+		return this.metaData.hiddenFields;
 	}
 
 	/**
@@ -564,8 +573,8 @@ export class Entity {
 	 * @param attribute
 	 * @param message Message
 	 */
-	protected setFieldMessage<K extends keyof this>(attribute: K, message: EntityMessage) {
-		this.metaData.attributes.messages[attribute as any] = message;
+	protected setFieldMessage<K extends keyof this>(attribute: K, message: EntityMessage) {		
+		this.metaData.fieldMessages[attribute as any] = message;
 	}
 
 	/**
@@ -647,7 +656,7 @@ export class Entity {
 	 * @param modified
 	 */
 	private setFieldModified(attribute: string, modified: boolean): void {
-		this.metaData.attributes.isModified[attribute] = modified;
+		this.metaData.modifiedFields[attribute] = modified;
 		if (modified === true) {
 			this.metaData.toBeSaved = true;
 		}

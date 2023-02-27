@@ -26,6 +26,11 @@ export type AttributeMetaData = AttributeMetaDataBooleanProperties & {
 
 export type AttributeMetaDataBooleanProperties = {
 	/**
+	 * Complete list of attributes
+	 */
+	attributeList: AttributeBooleanType;
+
+	/**
 	 * Holds all fields that are modified
 	 */
 	isModified: AttributeBooleanType;

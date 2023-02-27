@@ -8,6 +8,9 @@ export interface ValidatorJSConfig extends AttributeValidator {
 }
 
 export const ValidatorJS = (config: ValidatorJSConfig) => (target: Entity, member: string) => {
+	// This is required to register custom decorators
+	target.registerAttributeName(member);
+	
 	const uniqueName = 'ValidatorJS';
 
 	const args = {

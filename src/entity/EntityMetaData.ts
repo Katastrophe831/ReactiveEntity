@@ -1,4 +1,3 @@
-import { EntityException } from '@ReactiveEntity/exceptions';
 import { EntitySet, Entity, AttributeMetaData, BaseEntityMetaData } from '.';
 import { Utils } from '../utils';
 
@@ -19,7 +18,8 @@ export class EntityMetaData implements BaseEntityMetaData {
 
 	public isNew: boolean = false;
 
-	public attributes: AttributeMetaData = {
+	private attributes: AttributeMetaData = {
+		attributeList: {},
 		isModified: {},
 		isReadonly: {},
 		isRequired: {},
@@ -31,12 +31,54 @@ export class EntityMetaData implements BaseEntityMetaData {
 	};
 
 	/**
+	 * Required fields object - returns an object with key names and the boolean value
+	 */
+	public get requiredFields() {
+		return this.attributes.isRequired;
+	}
+
+	/**
+	 * Readonly fields object - returns an object with key names and the boolean value
+	 */
+	public get readonlyFields() {
+		return this.attributes.isReadonly;
+	}
+
+	/**
+	 * Modified fields - returns an object with key names and the boolean value
+	 */
+	public get modifiedFields() {
+		return this.attributes.isModified;
+	}
+
+	/**
+	 * Hidden fields - returns an object with key names and the boolean value
+	 */
+	public get hiddenFields() {
+		return this.attributes.isHidden;
+	}
+
+	/**
+	 * Non persistent fields
+	 */
+	public get nonPersistentFields() {
+		return this.attributes.isNonPersistent;
+	}
+	
+	/**
+	 * Field messagese
+	 */
+	public get fieldMessages() {
+		return this.attributes.messages;
+	}
+
+	/**
 	 * Get an object of undeclared properties
 	 * @param data
 	 * @returns
 	 */
 	public getUndeclaredProperties(data: any): any {
-		const metaDataProperties = ['isReadonly', 'isRequired', 'isNonPersistent', 'primaryKey'];
+		const metaDataProperties = ['attributeList', 'primaryKey'];
 
 		// Get all attributes declared by decorators
 		let props: any = {};
@@ -114,6 +156,14 @@ export class EntityMetaData implements BaseEntityMetaData {
 	}
 
 	/**
+	 * Register an attribute name
+	 * @param attribute 
+	 */
+	public registerAttributeName(attribute : string) : void {
+		this.attributes.attributeList[attribute] = true;
+	}
+
+	/**
 	 * Reset metadata
 	 */
 	public reset() {
@@ -136,9 +186,11 @@ export class EntityMetaData implements BaseEntityMetaData {
 
 		if (Array.isArray(attribute)) {
 			for (const attr of attribute) {
+				this.registerAttributeName(attr);
 				metaDataProp[attr as string] = value;
 			}
 		} else {
+			this.registerAttributeName(attribute);
 			metaDataProp[attribute as string] = value;
 		}
 	}
