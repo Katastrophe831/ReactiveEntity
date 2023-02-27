@@ -19,7 +19,6 @@ import {
 	AttributeRequiredException,
 	EntityReadonlyException,
 	EntityException,
-	Exception,
 } from '../exceptions';
 
 export class Entity {
@@ -103,7 +102,7 @@ export class Entity {
 	public get hasPrimaryKey(): boolean {
 		return this.metaData.primaryKeyName !== null;
 	}
-	
+
 	/**
 	 * Is readonly
 	 */
@@ -272,9 +271,9 @@ export class Entity {
 
 	/**
 	 * Register an attribute name
-	 * @param attribute 
+	 * @param attribute
 	 */
-	public registerAttributeName(attribute : string) : void {
+	public registerAttributeName(attribute: string): void {
 		this.metaData.registerAttributeName(attribute as any);
 	}
 
@@ -379,7 +378,7 @@ export class Entity {
 	 * @param attribute
 	 * @param message String
 	 */
-	public setFieldWarning<K extends keyof this>(attribute: K, message: string) {
+	public setFieldWarning<K extends keyof this>(attribute: K, message: string): void {
 		this.setFieldMessage(attribute, {
 			type: 'warn',
 			message,
@@ -391,7 +390,7 @@ export class Entity {
 	 * @param attribute
 	 * @param message String
 	 */
-	public setFieldError<K extends keyof this>(attribute: K, message: string) {
+	public setFieldError<K extends keyof this>(attribute: K, message: string): void {
 		this.setFieldMessage(attribute, {
 			type: 'error',
 			message,
@@ -403,7 +402,7 @@ export class Entity {
 	 * @param attribute
 	 * @param message String
 	 */
-	public setFieldInfo<K extends keyof this>(attribute: K, message: string) {
+	public setFieldInfo<K extends keyof this>(attribute: K, message: string): void {
 		this.setFieldMessage(attribute, {
 			type: 'info',
 			message,
@@ -414,7 +413,7 @@ export class Entity {
 	 * Clear field message
 	 * @param attribute
 	 */
-	public clearFieldMessage<K extends keyof this>(attribute: K) {
+	public clearFieldMessage<K extends keyof this>(attribute: K): void {
 		delete this.metaData.fieldMessages[attribute as any];
 	}
 
@@ -573,7 +572,7 @@ export class Entity {
 	 * @param attribute
 	 * @param message Message
 	 */
-	protected setFieldMessage<K extends keyof this>(attribute: K, message: EntityMessage) {		
+	protected setFieldMessage<K extends keyof this>(attribute: K, message: EntityMessage) {
 		this.metaData.fieldMessages[attribute as any] = message;
 	}
 
@@ -691,35 +690,46 @@ export class Entity {
 
 		const newValue = this.beforeChange(attribute, value);
 
-		this.validateField(attribute, newValue);
+		if (this.validateField(attribute, newValue)) {
 
-		(this as any)[attribute] = newValue;
-
-		this.setFieldModified(attribute, true);
-
-		this.afterChange(attribute);
+			this.clearFieldMessage(attribute as any);
+	
+			(this as any)[attribute] = newValue;
+	
+			this.setFieldModified(attribute, true);
+	
+			this.afterChange(attribute);
+		}
 	}
 
 	/**
 	 * Validate field
-	 * @param attribute
-	 * @param value
+	 * @param attribute 
+	 * @param value 
+	 * @returns {boolean} true if success, false if fails
 	 */
-	private validateField(attribute: string, value: any) {
-		Object.keys(this.attributeValidators).forEach((k) => {
-			const [validator, ...args] = this.attributeValidators[k];
-			if (typeof validator === 'function') {
-				const param: ValidatorArgType[] = (args as ValidatorArgType[]).filter((a) => a.property === attribute);
-				if (param.length > 0) {
-					try {
-						(validator as ValidatorCallbackType)(this.clone(), attribute, value, param[0].args);
-					} catch (e) {
-						this.setFieldError(attribute as any, (e as Error).message);
-						throw e;
+	private validateField(attribute: string, value: any) : boolean {
+		try {
+			Object.keys(this.attributeValidators).forEach((k) => {
+				const [validator, ...args] = this.attributeValidators[k];
+				if (typeof validator === 'function') {
+					const param: ValidatorArgType[] = (args as ValidatorArgType[]).filter((a) => a.property === attribute);
+					if (param.length > 0) {
+						try {
+							(validator as Function)(this.clone(), attribute, value, param[0].args);						
+						} catch (e) {
+							this.setFieldError(attribute as any, (e as Error).message);
+							throw e;
+						}
 					}
 				}
-			}
-		});
+			});
+		} 
+		catch (e) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

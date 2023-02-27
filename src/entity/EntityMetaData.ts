@@ -1,4 +1,4 @@
-import { EntitySet, Entity, AttributeMetaData, BaseEntityMetaData } from '.';
+import { EntitySet, Entity, AttributeMetaData, BaseEntityMetaData, FieldMessage, AttributeBooleanType } from '.';
 import { Utils } from '../utils';
 
 export class EntityMetaData implements BaseEntityMetaData {
@@ -33,42 +33,42 @@ export class EntityMetaData implements BaseEntityMetaData {
 	/**
 	 * Required fields object - returns an object with key names and the boolean value
 	 */
-	public get requiredFields() {
+	public get requiredFields(): AttributeBooleanType {
 		return this.attributes.isRequired;
 	}
 
 	/**
 	 * Readonly fields object - returns an object with key names and the boolean value
 	 */
-	public get readonlyFields() {
+	public get readonlyFields(): AttributeBooleanType {
 		return this.attributes.isReadonly;
 	}
 
 	/**
 	 * Modified fields - returns an object with key names and the boolean value
 	 */
-	public get modifiedFields() {
+	public get modifiedFields(): AttributeBooleanType {
 		return this.attributes.isModified;
 	}
 
 	/**
 	 * Hidden fields - returns an object with key names and the boolean value
 	 */
-	public get hiddenFields() {
+	public get hiddenFields(): AttributeBooleanType {
 		return this.attributes.isHidden;
 	}
 
 	/**
 	 * Non persistent fields
 	 */
-	public get nonPersistentFields() {
+	public get nonPersistentFields(): AttributeBooleanType {
 		return this.attributes.isNonPersistent;
 	}
-	
+
 	/**
 	 * Field messagese
 	 */
-	public get fieldMessages() {
+	public get fieldMessages(): FieldMessage {
 		return this.attributes.messages;
 	}
 
@@ -157,9 +157,9 @@ export class EntityMetaData implements BaseEntityMetaData {
 
 	/**
 	 * Register an attribute name
-	 * @param attribute 
+	 * @param attribute
 	 */
-	public registerAttributeName(attribute : string) : void {
+	public registerAttributeName(attribute: string): void {
 		this.attributes.attributeList[attribute] = true;
 	}
 
