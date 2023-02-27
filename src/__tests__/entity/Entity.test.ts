@@ -50,7 +50,7 @@ class User extends Entity {
 	READONLY!: string;
 }
 
-describe('Entity Tests', () => {
+describe('Entity Tests - Testing', () =>     {
 	test('getValue()', () => {
 		const entitySet: EntitySet = new UserSet(data);
 		expect(entitySet[0].NAME).toBe(data[0].NAME);
