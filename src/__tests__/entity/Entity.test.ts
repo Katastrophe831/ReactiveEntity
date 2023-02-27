@@ -58,6 +58,7 @@ describe('Entity Tests', () => {
 		expect(entitySet[0].getValue('NUMTYPE')).toBe(1);
 		expect(entitySet[0].getValue('NULL')).toBeNull();
 		expect(() => entitySet[0].getValue('UNDEFINED_PROP')).toThrowError(new AttributeNotFoundException('UNDEFINED_PROP'));
+		expect(() => entitySet[0].getValue('UNDEFINED')).toThrowError(new AttributeNotFoundException('UNDEFINED'));
 	});
 
 	test('getString()', () => {

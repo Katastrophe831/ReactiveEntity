@@ -10,7 +10,7 @@ export type FieldMessage = { [key: string]: EntityMessage };
 
 export type AttributeBooleanType = { [key: string]: boolean };
 
-export type AttributeValidatorType = { [key: string]: AttributeValidator };
+export type AttributeValidatorType = { [key: string]: ValidatorDecorator };
 
 export type AttributeMetaData = AttributeMetaDataBooleanProperties & {
 	/**
@@ -61,9 +61,9 @@ export type AttributeMetaDataBooleanProperties = {
 	primaryKey: AttributeBooleanType;
 };
 
-export type AttributeValidator = {
+export type ValidatorDecorator = {
 	/**
-	 * Attribute validator
+	 * Validator decorator
 	 * @param target
 	 * @param value
 	 * @returns

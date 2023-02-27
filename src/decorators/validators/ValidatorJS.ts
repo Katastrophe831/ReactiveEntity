@@ -1,23 +1,23 @@
 // https://github.com/mikeerickson/validatorjs
 
-import { Entity, AttributeValidator, ValidatorCallbackType } from '../../entity';
+import { Entity, ValidatorDecorator, ValidatorCallbackType } from '../../entity';
 import * as Validator from 'validatorjs';
 
-export interface ValidatorJSConfig extends AttributeValidator {
+export interface ValidatorJSConfig extends ValidatorDecorator {
 	rules: string | (string | Validator.TypeCheckingRule)[] | Validator.Rules;
 }
 
 export const ValidatorJS = (config: ValidatorJSConfig) => (target: Entity, member: string) => {
 	// This is required to register custom decorators
 	target.registerAttributeName(member);
-	
-	const uniqueName = 'ValidatorJS';
+
+	const decoratorName = 'ValidatorJS';
 
 	const args = {
 		[member]: config.rules,
 	};
 
-	target.registerAttributeValidator(uniqueName, member, {
+	target.registerAttributeValidator(decoratorName, member, {
 		args, // This will be passed back to the callback function
 		callback,
 	});

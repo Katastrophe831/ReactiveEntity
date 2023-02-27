@@ -1,5 +1,5 @@
-import { AttributeValidator, Entity } from '../../entity';
+import { Entity } from '../../entity';
 
-export const AttributeConfig = (config: AttributeValidator) => (target: Entity, member: string) => {
+export const AttributeConfig = (config: any) => (target: Entity, member: string) => {
 	// TODO
 };
