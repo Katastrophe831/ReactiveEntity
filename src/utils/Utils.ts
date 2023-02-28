@@ -63,6 +63,10 @@ export class Utils {
 		const parsedDate = new Date(Date.parse(value));
 		const plainDate = new Date(value);
 
+		if (d.toString() === 'Invalid Date' && parsedDate.toString() === 'Invalid Date') {
+			return null;
+		}
+
 		if (d.toString() !== 'Invalid Date') {
 			return d;
 		} else if (parsedDate !== null) {
