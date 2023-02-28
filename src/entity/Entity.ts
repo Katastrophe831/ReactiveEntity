@@ -11,7 +11,6 @@ import {
 	ValidatorCallbackType,
 	ValidatorArgType,
 	FieldAccess,
-	AccessModifiers,
 } from '.';
 import {
 	AttributeNotFoundException,
@@ -129,13 +128,6 @@ export class Entity {
 	 */
 	public get toBeDeleted(): boolean {
 		return this.metaData.toBeDeleted;
-	}
-
-	/**
-	 * Getter for all field messages
-	 */
-	public get fieldMessages(): FieldMessage {
-		return this.metaData.fieldMessages;
 	}
 
 	/**
@@ -415,6 +407,25 @@ export class Entity {
 	}
 
 	/**
+	 * Has field message
+	 * @param attribute
+	 */
+	public hasFieldMessage<K extends keyof this>(attribute: K): boolean {
+		return !Utils.isNullOrEmpty(this.metaData.fieldMessages[attribute as any]);
+	}
+
+	/**
+	 * Get field message
+	 * @param attribute
+	 */
+	public getFieldMessage<K extends keyof this>(attribute: K): EntityMessage | null {
+		if (this.hasFieldMessage(attribute)) {
+			return this.metaData.fieldMessages[attribute as any] ?? null;
+		}
+		return null;
+	}
+
+	/**
 	 * Clear field message
 	 * @param attribute
 	 */
@@ -649,6 +660,13 @@ export class Entity {
 	 */
 	private get accessModifiers() {
 		return this.metaData.accessModifiers;
+	}
+
+	/**
+	 * Getter for all field messages
+	 */
+	private get fieldMessages(): FieldMessage {
+		return this.metaData.fieldMessages;
 	}
 
 	/**

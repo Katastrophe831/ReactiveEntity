@@ -1,4 +1,4 @@
-import { EntitySet, Entity, EntityAttributes, FieldAccess } from '../../entity';
+import { Entity, EntityAttributes, FieldAccess } from '../../entity';
 import {
 	AttributeNotFoundException,
 	AttributeReadonlyException,
@@ -313,30 +313,30 @@ describe('Entity', () => {
 			const user = new User(data);
 
 			user.setFieldError('STRING', 'Error Message');
-			expect(user.fieldMessages['STRING']).toMatchObject({ type: 'error', message: 'Error Message' });
+			expect(user.getFieldMessage('STRING')).toMatchObject({ type: 'error', message: 'Error Message' });
 
 			user.reset();
-			expect(user.fieldMessages['STRING']).toBeUndefined();
+			expect(user.getFieldMessage('STRING')).toBeNull();
 		});
 
 		test('should be info message', () => {
 			const user = new User(data);
 
 			user.setFieldInfo('STRING', 'Info Message');
-			expect(user.fieldMessages['STRING']).toMatchObject({ type: 'info', message: 'Info Message' });
+			expect(user.getFieldMessage('STRING')).toMatchObject({ type: 'info', message: 'Info Message' });
 
 			user.reset();
-			expect(user.fieldMessages['STRING']).toBeUndefined();
+			expect(user.getFieldMessage('STRING')).toBeNull();
 		});
 
 		test('should be warn message', () => {
 			const user = new User(data);
 
 			user.setFieldWarning('STRING', 'Warn Message');
-			expect(user.fieldMessages['STRING']).toMatchObject({ type: 'warn', message: 'Warn Message' });
+			expect(user.getFieldMessage('STRING')).toMatchObject({ type: 'warn', message: 'Warn Message' });
 
 			user.reset();
-			expect(user.fieldMessages['STRING']).toBeUndefined();
+			expect(user.getFieldMessage('STRING')).toBeNull();
 		});
 	});
 
@@ -739,14 +739,14 @@ describe('Entity', () => {
 				expect((user.PROP1 = 'h')).toBe('h');
 
 				user.PROP1 = '';
-				expect(user.fieldMessages['PROP1']?.message).toBe('The PROP1 field is required.');
+				expect(user.getFieldMessage('PROP1')?.message).toBe('The PROP1 field is required.');
 				expect((user.PROP2 = 'h')).toBe('h');
 
 				user.PROP2 = 'hh';
-				expect(user.fieldMessages['PROP2']?.message).toBe('The PROP2 and PROP1 fields must match.');
+				expect(user.getFieldMessage('PROP2')?.message).toBe('The PROP2 and PROP1 fields must match.');
 
 				user.PROP3 = 'hh';
-				expect(user.fieldMessages['PROP3']?.message).toBe('The PROP3 format is invalid.');
+				expect(user.getFieldMessage('PROP3')?.message).toBe('The PROP3 format is invalid.');
 				expect((user.PROP3 = 'email@email.com')).toBe('email@email.com');
 			});
 		});
