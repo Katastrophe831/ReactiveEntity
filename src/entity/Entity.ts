@@ -710,15 +710,15 @@ export class Entity {
 
 		const newValue = this.beforeChange(attribute, value);
 
-		if (this.validateField(attribute, newValue)) {
-			this.clearFieldMessage(attribute as any);
+		this.validateField(attribute, newValue);
 
-			(this as any)[attribute] = newValue;
+		(this as any)[attribute] = newValue;
 
-			this.setFieldModified(attribute, true);
+		this.validateAllModifiedFields(attribute);
 
-			this.afterChange(attribute);
-		}
+		this.setFieldModified(attribute, true);
+
+		this.afterChange(attribute);
 	}
 
 	/**
@@ -743,7 +743,27 @@ export class Entity {
 			return false;
 		}
 
+		this.clearFieldMessage(attribute as keyof this);
+
 		return true;
+	}
+
+	/**
+	 * Validate all modified fields
+	 */
+	private validateAllModifiedFields(exclude?: string | string[]): void {
+		const excludeValues: string[] = [];
+		if (Array.isArray(exclude)) {
+			excludeValues.push(...exclude);
+		} else if (typeof exclude === 'string') {
+			excludeValues.push(exclude);
+		}
+
+		Object.keys(this.modifiedFields)
+			.filter((k) => excludeValues.indexOf(k) === -1)
+			.forEach((k) => {
+				this.validateField(k, this[k as keyof this]);
+			});
 	}
 
 	/**

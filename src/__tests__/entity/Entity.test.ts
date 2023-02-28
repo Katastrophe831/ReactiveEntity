@@ -749,6 +749,26 @@ describe('Entity', () => {
 				expect(user.getFieldMessage('PROP3')?.message).toBe('The PROP3 format is invalid.');
 				expect((user.PROP3 = 'email@email.com')).toBe('email@email.com');
 			});
+
+			test('should re-validate each modified field as data changes', () => {
+				const user = new User(data);
+
+				user.PROP1 = '';
+				expect(user.getFieldMessage('PROP1')?.message).toBe('The PROP1 field is required.');
+
+				user.PROP2 = 'testing';
+				expect(user.getFieldMessage('PROP1')?.message).toBe('The PROP1 field is required.');
+				expect(user.getFieldMessage('PROP2')?.message).toBe('The PROP2 and PROP1 fields must match.');
+
+				user.PROP1 = 'testing1';
+				expect(user.getFieldMessage('PROP1')).toBe(null);
+				expect(user.getFieldMessage('PROP2')?.message).toBe('The PROP2 and PROP1 fields must match.');
+
+				user.PROP1 = 'testing';
+				expect(user.getFieldMessage('PROP1')).toBe(null);
+				expect(user.PROP1).toBe(user.PROP2);
+				expect(user.getFieldMessage('PROP2')).toBe(null);
+			});
 		});
 
 		describe('PrimaryKey', () => {
