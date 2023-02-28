@@ -1,12 +1,12 @@
 import { Utils } from '../../utils/Utils';
 
 describe('Utils Tests', () => {
-	test('replaceAll', () => {
+	test('should replace all in a string', () => {
 		expect(Utils.replaceAll('Attribute {0} is readonly', '{0}', 'NAME')).toBe('Attribute NAME is readonly');
 		expect(Utils.replaceAll('Attribute {{0}} is readonly', '{{0}}', 'NAME')).toBe('Attribute NAME is readonly');
 	});
 
-	test('isNullOrEmpty', () => {
+	test('should check if a value is null or undefined or empty string', () => {
 		// False statements
 		expect(Utils.isNullOrEmpty('null')).toBe(false);
 		expect(Utils.isNullOrEmpty('1')).toBe(false);
@@ -22,32 +22,32 @@ describe('Utils Tests', () => {
 		expect(Utils.isNullOrEmpty(undefined)).toBe(true);
 	});
 
-	test('String to Date', () => {
+	test('should convert a string to a Date', () => {
 		const date = new Date();
 		expect(Utils.stringToDate('' + date.getTime())).toMatchObject(date);
 		expect(Utils.stringToDate(date.toISOString())).toMatchObject(date);
 	});
 
-	test('parseNumber', () => {
+	test('should parse a "en-US" string to a number', () => {
 		expect(Utils.parseNumber('1.2')).toBe(1.2);
 		expect(Utils.parseNumber('1,200')).toBe(1200);
 		expect(Utils.parseNumber('1,200.2')).toBe(1200.2);
 	});
 
-	test('parseNumber - locale', () => {
+	test('should parse a "fr-FR" string to a number ', () => {
 		expect(Utils.parseNumber('1,2', 'fr-FR')).toBe(1.2);
 		expect(Utils.parseNumber('1 200', 'fr-FR')).toBe(1200);
 		expect(Utils.parseNumber('1 200,2', 'fr-FR')).toBe(1200.2);
 	});
 
-	test('Is Number', () => {
+	test('should check if a string is a "en-US" number', () => {
 		const date = new Date();
 		expect(Utils.isNumber('1.2')).toBe(true);
 		expect(Utils.isNumber('1.2b')).toBe(false);
 		expect(Utils.isNumber('b1.2')).toBe(false);
 	});
 
-	test('Is Number - Locale', () => {
+	test('should check if a string is a "fr-FR" number', () => {
 		const date = new Date();
 		expect(Utils.isNumber('1,2', 'fr-FR')).toBe(true);
 		expect(Utils.isNumber('1 200,2', 'fr-FR')).toBe(true);
@@ -55,7 +55,7 @@ describe('Utils Tests', () => {
 		expect(Utils.isNumber('b1 200,2', 'fr-FR')).toBe(false);
 	});
 
-	test('getObjectFromKeys', () => {
+	test('should get all keys from an object and conver them to null', () => {
 		const thisObject = {
 			KEY1: true,
 			KEY2: true,
@@ -67,7 +67,7 @@ describe('Utils Tests', () => {
 		expect(Utils.getObjectFromKeys(thisObject)).toMatchObject(thatObject);
 	});
 
-	test('removeKeysThatAlreadyExist', () => {
+	test('should take two objects and return an object with only keys that dont exist', () => {
 		const newObject = {
 			EXISTS1: true,
 			EXISTS2: true,

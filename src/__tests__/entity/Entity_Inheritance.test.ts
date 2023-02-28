@@ -93,54 +93,63 @@ class UserSet_2 extends UserSet {
 	}
 }
 
-describe('Entity Inheritance Tests', () => {
-	test('getValue()', () => {
-		const entitySet: UserSet_2 = new UserSet_2(data);
-		expect(entitySet[0].getValue('NAME')).toBe(data[0].NAME);
-		expect(entitySet[0].getValue('NUMTYPE')).toBe(1);
-		expect(entitySet[0].getValue('NULL')).toBeNull();
+describe('Entity Inheritance', () => {
+	describe('Getters / Setters', () => {
+		test('should match get values', () => {
+			const entitySet: UserSet_2 = new UserSet_2(data);
+			expect(entitySet[0].NAME).toBe(data[0].NAME);
+			expect(entitySet[0].getValue('NAME')).toBe(data[0].NAME);
+			expect(entitySet[0].getValue('NUMTYPE')).toBe(1);
+			expect(entitySet[0].getValue('NULL')).toBeNull();
+		});
+
+		test('should be able to set value', () => {
+			const entitySet: UserSet_2 = new UserSet_2(data);
+			const entity: User_2 = entitySet[0];
+			entity.NAME = 'HELLO';
+			expect(entity.NAME).toBe('HELLO_3');
+		});		
 	});
 
-	test('clone', () => {
-		const entitySet: UserSet = new UserSet(data);
-		const entity: User = entitySet[0];
-		const copyEntity: object = entity.clone();
-		expect(JSON.stringify(copyEntity)).toBe(JSON.stringify(entity));
+	describe('Clone / Copy', () => {
+		test('should clone data', () => {
+			const entitySet: UserSet = new UserSet(data);
+			const entity: User = entitySet[0];
+			const copyEntity: object = entity.clone();
+			expect(JSON.stringify(copyEntity)).toBe(JSON.stringify(entity));
+		});
+
+		test('should copy data and constructor', () => {
+			const entitySet: UserSet_2 = new UserSet_2(data);
+			const entity: User_2 = entitySet[0];
+			const clonedEntity: User = entity.copy() as User_2;
+			expect(clonedEntity.constructor.name).toBe('User_2');
+			expect(clonedEntity instanceof Entity).toBe(true);
+			expect(clonedEntity instanceof User).toBe(true);
+			expect(clonedEntity instanceof User_2).toBe(true);
+		});
 	});
 
-	test('copy', () => {
-		const entitySet: UserSet_2 = new UserSet_2(data);
-		const entity: User_2 = entitySet[0];
-		const clonedEntity: User = entity.copy() as User_2;
-		expect(clonedEntity.constructor.name).toBe('User_2');
-		expect(clonedEntity instanceof Entity).toBe(true);
-		expect(clonedEntity instanceof User).toBe(true);
-		expect(clonedEntity instanceof User_2).toBe(true);
-	});
+	describe('Event handling', () => {
+	
+		test('should return modified value through inheritance', () => {
+			const entitySet: UserSet_2 = new UserSet_2(data);
+			const entity: User_2 = entitySet[0];
+			entity.NAME = 'HELLO';
+			expect(entity.USERID).toBe(entity.NAME);
+			expect(entity.USERID).toBe('HELLO_3');
+	
+			entity.USERID = 'NEW-USERID';
+			expect(entity.USERID == entity.NAME).toBeFalsy();
+			expect(entity.USERID).toBe('NEW-USERID');
+		});
+	
+		test('should throw exception in beforeChange', () => {
+			const entitySet: UserSet_2 = new UserSet_2(data);
+			const entity: User_2 = entitySet[0];
+			expect(() => (entity.NUMTYPE = 10)).toThrowError('Catch me');
+			expect(entity.NUMTYPE).toBe(1);
+		});
 
-	test('set property value', () => {
-		const entitySet: UserSet_2 = new UserSet_2(data);
-		const entity: User_2 = entitySet[0];
-		entity.NAME = 'HELLO';
-		expect(entity.NAME).toBe('HELLO_3');
-	});
-
-	test('set value check beforeChange -> afterChange logic', () => {
-		const entitySet: UserSet_2 = new UserSet_2(data);
-		const entity: User_2 = entitySet[0];
-		entity.NAME = 'HELLO';
-		expect(entity.USERID).toBe(entity.NAME);
-		expect(entity.USERID).toBe('HELLO_3');
-
-		entity.USERID = 'NEW-USERID';
-		expect(entity.USERID == entity.NAME).toBeFalsy();
-		expect(entity.USERID).toBe('NEW-USERID');
-	});
-
-	test('set value check exception with beforeChange', () => {
-		const entitySet: UserSet_2 = new UserSet_2(data);
-		const entity: User_2 = entitySet[0];
-		expect(() => (entity.NUMTYPE = 10)).toThrowError('Catch me');
-		expect(entity.NUMTYPE).toBe(1);
 	});
 });
