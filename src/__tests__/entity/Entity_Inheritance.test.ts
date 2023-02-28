@@ -108,7 +108,7 @@ describe('Entity Inheritance', () => {
 			const entity: User_2 = entitySet[0];
 			entity.NAME = 'HELLO';
 			expect(entity.NAME).toBe('HELLO_3');
-		});		
+		});
 	});
 
 	describe('Clone / Copy', () => {
@@ -131,25 +131,23 @@ describe('Entity Inheritance', () => {
 	});
 
 	describe('Event handling', () => {
-	
 		test('should return modified value through inheritance', () => {
 			const entitySet: UserSet_2 = new UserSet_2(data);
 			const entity: User_2 = entitySet[0];
 			entity.NAME = 'HELLO';
 			expect(entity.USERID).toBe(entity.NAME);
 			expect(entity.USERID).toBe('HELLO_3');
-	
+
 			entity.USERID = 'NEW-USERID';
 			expect(entity.USERID == entity.NAME).toBeFalsy();
 			expect(entity.USERID).toBe('NEW-USERID');
 		});
-	
+
 		test('should throw exception in beforeChange', () => {
 			const entitySet: UserSet_2 = new UserSet_2(data);
 			const entity: User_2 = entitySet[0];
 			expect(() => (entity.NUMTYPE = 10)).toThrowError('Catch me');
 			expect(entity.NUMTYPE).toBe(1);
 		});
-
 	});
 });

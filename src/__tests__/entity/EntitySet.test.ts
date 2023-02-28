@@ -51,12 +51,12 @@ class UserSet extends EntitySet {
 
 describe('Entity Set', () => {
 	describe('Populate data', () => {
-		test('should populate data using just array data', ()=> {
+		test('should populate data using just array data', () => {
 			let entitySet: EntitySet = new UserSet(data);
 			expect(entitySet.toData()).toBe(JSON.stringify(data));
 		});
 
-		test('should populate data using EntitySetArgs', ()=> {
+		test('should populate data using EntitySetArgs', () => {
 			let entitySet = new UserSet({ data });
 			expect(entitySet.toData()).toBe(JSON.stringify(data));
 		});
@@ -72,7 +72,6 @@ describe('Entity Set', () => {
 			const entitySet: UserSet = new UserSet();
 			expect(entitySet.isEmpty).toBe(true);
 		});
-	
 	});
 
 	describe('Select Records', () => {
@@ -82,38 +81,38 @@ describe('Entity Set', () => {
 			expect(entitySet[0].isSelected).toBe(true);
 			expect(entitySet[1].isSelected).toBe(true);
 		});
-		
+
 		test('should unselect all', () => {
 			const entitySet: UserSet = new UserSet(data);
 			entitySet.selectAll();
 			expect(entitySet[0].isSelected).toBe(true);
 			expect(entitySet[1].isSelected).toBe(true);
-	
+
 			entitySet.unselectAll();
 			expect(entitySet[0].isSelected).toBe(false);
 			expect(entitySet[1].isSelected).toBe(false);
-		});		
+		});
 
 		test('should toggle select all', () => {
 			const entitySet: UserSet = new UserSet(data);
 			entitySet.selectAll();
 			expect(entitySet[0].isSelected).toBe(true);
 			expect(entitySet[1].isSelected).toBe(true);
-	
+
 			entitySet.toggleSelectAll();
 			expect(entitySet[0].isSelected).toBe(false);
 			expect(entitySet[1].isSelected).toBe(false);
 		});
-		
+
 		test('should return selected records', () => {
 			const entitySet: UserSet = new UserSet(data);
 			entitySet[0].select();
 			expect(entitySet.getSelectedRecords().length).toBe(1);
 			expect(entitySet.getSelectedRecords()[0]).toMatchObject(entitySet[0]);
-	
+
 			entitySet.selectAll();
 			expect(entitySet.getSelectedRecords().length).toBe(2);
-	
+
 			entitySet.unselectAll();
 			expect(entitySet.getSelectedRecords().length).toBe(0);
 		});
@@ -143,7 +142,7 @@ describe('Entity Set', () => {
 			const entity: User = entitySet[2];
 			expect(entity.isReadonly).toBe(false);
 			expect(entity.appName).toBe('USERAPP');
-	
+
 			entitySet.setReadonly(true);
 			expect(() => {
 				entitySet.addNew({
@@ -159,7 +158,7 @@ describe('Entity Set', () => {
 
 		test('should throw exception when adding new to readonly set', () => {
 			const entitySet: UserSet = new UserSet({ data, isReadonly: true, appName: 'USERAPP' });
-	
+
 			entitySet.setReadonly(true);
 			expect(() => {
 				entitySet.addNew({
@@ -171,6 +170,6 @@ describe('Entity Set', () => {
 					NULL: null,
 				});
 			}).toThrowError(new EntitySetReadonlyException(entitySet.constructor.name));
-		});		
-	});	
+		});
+	});
 });
