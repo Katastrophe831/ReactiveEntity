@@ -1,4 +1,12 @@
-import { EntitySet, Entity, AttributeMetaData, BaseEntityMetaData, FieldMessage, AttributeBooleanType } from '.';
+import {
+	EntitySet,
+	Entity,
+	AttributeMetaData,
+	BaseEntityMetaData,
+	FieldMessage,
+	AttributeBooleanType,
+	AccessModifiers,
+} from '.';
 import { Utils } from '../utils';
 
 export class EntityMetaData implements BaseEntityMetaData {
@@ -17,6 +25,8 @@ export class EntityMetaData implements BaseEntityMetaData {
 	public isSelected: boolean = false;
 
 	public isNew: boolean = false;
+
+	public accessModifiers: AccessModifiers = new AccessModifiers();
 
 	private attributes: AttributeMetaData = {
 		attributeList: {},
@@ -168,6 +178,7 @@ export class EntityMetaData implements BaseEntityMetaData {
 	 */
 	public reset() {
 		this.toBeSaved = false;
+		this.toBeDeleted = false;
 		this.isNew = false;
 		this.isSelected = false;
 		this.attributes.isModified = {};

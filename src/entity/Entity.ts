@@ -34,8 +34,6 @@ export class Entity {
 
 	private __METADATA!: EntityMetaData;
 
-	private __ACCESS_MODIFIERS!: AccessModifiers;
-
 	/**
 	 * Constructor
 	 * @param args
@@ -78,7 +76,7 @@ export class Entity {
 	 */
 	public get primaryKeyName(): string {
 		const value = this.metaData.primaryKeyName;
-		if (value == null) {
+		if (value === null) {
 			throw new EntityException(
 				this.constructor.name,
 				'entity#primarykeynotfound',
@@ -152,6 +150,13 @@ export class Entity {
 	 */
 	public undelete(): void {
 		this.metaData.toBeDeleted = false;
+	}
+
+	/**
+	 * Unmarks the entity to be deleted.
+	 */
+	public deleteToggle(): void {
+		this.metaData.toBeDeleted = !this.metaData.toBeDeleted;
 	}
 
 	/**
@@ -643,10 +648,7 @@ export class Entity {
 	 * Access modifiers
 	 */
 	private get accessModifiers() {
-		if (!this.__ACCESS_MODIFIERS) {
-			this.__ACCESS_MODIFIERS = new AccessModifiers();
-		}
-		return this.__ACCESS_MODIFIERS;
+		return this.metaData.accessModifiers;
 	}
 
 	/**
@@ -691,41 +693,35 @@ export class Entity {
 		const newValue = this.beforeChange(attribute, value);
 
 		if (this.validateField(attribute, newValue)) {
-
 			this.clearFieldMessage(attribute as any);
-	
+
 			(this as any)[attribute] = newValue;
-	
+
 			this.setFieldModified(attribute, true);
-	
+
 			this.afterChange(attribute);
 		}
 	}
 
 	/**
 	 * Validate field
-	 * @param attribute 
-	 * @param value 
+	 * @param attribute
+	 * @param value
 	 * @returns {boolean} true if success, false if fails
 	 */
-	private validateField(attribute: string, value: any) : boolean {
+	private validateField(attribute: string, value: any): boolean {
 		try {
 			Object.keys(this.attributeValidators).forEach((k) => {
 				const [validator, ...args] = this.attributeValidators[k];
 				if (typeof validator === 'function') {
 					const param: ValidatorArgType[] = (args as ValidatorArgType[]).filter((a) => a.property === attribute);
 					if (param.length > 0) {
-						try {
-							(validator as Function)(this.clone(), attribute, value, param[0].args);						
-						} catch (e) {
-							this.setFieldError(attribute as any, (e as Error).message);
-							throw e;
-						}
+						(validator as ValidatorCallbackType)(this.clone(), attribute, value, param[0].args);
 					}
 				}
 			});
-		} 
-		catch (e) {
+		} catch (e) {
+			this.setFieldError(attribute as any, (e as Error).message);
 			return false;
 		}
 

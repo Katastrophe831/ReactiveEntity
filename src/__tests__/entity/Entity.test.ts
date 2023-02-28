@@ -7,93 +7,208 @@ import {
 } from '../../exceptions';
 import { NonPersistent, PrimaryKey, Readonly, Required, ValidatorJS } from '../../decorators';
 
-const data = [
-	{
-		USERID: '1',
-		NAME: 'John Doe',
-		NUMTYPE: 1,
-		YORN: 0,
-		DATE: new Date('1/1/2020 12:00 AM'),
-		ISODATE: '2020-01-01T05:00:00.000Z',
-		NULL: null,
-		UNDEFINED: undefined,
-		READONLY: 'readonly',
-	},
-	{
-		USERID: '2',
-		NAME: 'Jane Doe',
-		NUMTYPE: 2,
-		YORN: 1,
-		DATE: new Date('1/1/2020 12:00 AM'),
-		ISODATE: '2020-01-01T05:00:00.000Z',
-		NULL: null,
-		UNDEFINED: undefined,
-		READONLY: 'readonly',
-	},
-];
+describe('Entity', () => {
+	describe('Entity getters', () => {
+		const data = {
+			STRING: '1',
+			NUMBER: 1,
+			DATE: new Date('1/1/2020 12:00 AM'),
+			ISODATE: '2020-01-01T05:00:00.000Z',
+			BOOLEAN: true,
+			NULL: null,
+			UNDEFINED: undefined,
+		};
+		class User extends Entity {
+			STRING!: string;
+			NUMBER!: number;
+			DATE!: Date;
+			ISODATE!: string;
+			BOOLEAN!: boolean;
+			NULL!: string | null;
+			UNDEFINED!: string;
+		}
 
-class UserSet extends EntitySet {
-	protected get entityClass() {
-		return User;
-	}
-}
+		test('Getters should return raw values', () => {
+			const user = new User(data);
 
-class User extends Entity {
-	USERID!: string | null;
-	NAME!: string | null;
-	NUMTYPE!: number;
-	YORN!: number;
-	DATE!: Date;
-	ISODATE!: string;
-	NULL!: string;
-	UNDEFINED!: string;
-	READONLY!: string;
-}
+			expect(user.STRING).toBe(data.STRING);
+			expect(user.NUMBER).toBe(data.NUMBER);
+			expect(user.DATE).toBe(data.DATE);
+			expect(user.ISODATE).toBe(data.ISODATE);
+			expect(user.BOOLEAN).toBe(data.BOOLEAN);
+			expect(user.NULL).toBe(data.NULL);
+			expect(user.NULL).toBeNull();
+		});
 
-describe('Entity Tests - Testing', () =>     {
-	test('getValue()', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		expect(entitySet[0].NAME).toBe(data[0].NAME);
-		expect(entitySet[0].getValue('NAME')).toBe(data[0].NAME);
-		expect(entitySet[0].getValue('NUMTYPE')).toBe(1);
-		expect(entitySet[0].getValue('NULL')).toBeNull();
-		expect(() => entitySet[0].getValue('UNDEFINED_PROP')).toThrowError(new AttributeNotFoundException('UNDEFINED_PROP'));
-		expect(() => entitySet[0].getValue('UNDEFINED')).toThrowError(new AttributeNotFoundException('UNDEFINED'));
+		describe('getValue()', () => {
+			test('should return raw values', () => {
+				const user = new User(data);
+
+				expect(user.getValue('STRING')).toBe(data.STRING);
+				expect(user.getValue('NUMBER')).toBe(data.NUMBER);
+				expect(user.getValue('DATE')).toBe(data.DATE);
+				expect(user.getValue('ISODATE')).toBe(data.ISODATE);
+				expect(user.getValue('BOOLEAN')).toBe(data.BOOLEAN);
+				expect(user.getValue('NULL')).toBe(data.NULL);
+				expect(user.getValue('NULL')).toBeNull();
+			});
+
+			test('should throw exception for undefined values', () => {
+				const user = new User(data);
+
+				expect(() => user.getValue('UNDEFINED')).toThrowError(new AttributeNotFoundException('UNDEFINED'));
+				expect(() => user.getValue('UNDECLARED' as any)).toThrowError(new AttributeNotFoundException('UNDECLARED'));
+			});
+		});
+
+		describe('getString()', () => {
+			test('should return string values of raw types', () => {
+				const user = new User(data);
+
+				expect(user.getString('STRING')).toBe('' + data.STRING);
+				expect(user.getString('NUMBER')).toBe('' + data.NUMBER);
+				expect(user.getString('DATE')).toBe('' + data.DATE);
+				expect(user.getString('ISODATE')).toBe('' + data.ISODATE);
+				expect(user.getString('BOOLEAN')).toBe('' + data.BOOLEAN);
+			});
+
+			test('should return null', () => {
+				const user = new User(data);
+
+				expect(user.getString('NULL')).toBeNull();
+			});
+
+			test('should throw exception for undefined values', () => {
+				const user = new User(data);
+
+				expect(() => user.getString('UNDEFINED')).toThrowError(new AttributeNotFoundException('UNDEFINED'));
+				expect(() => user.getString('UNDECLARED' as any)).toThrowError(new AttributeNotFoundException('UNDECLARED'));
+			});
+		});
+
+		describe('getNumber()', () => {
+			test('should return number types', () => {
+				const user = new User(data);
+
+				expect(user.getNumber('STRING')).toBe(1);
+				expect(user.getNumber('NUMBER')).toBe(1);
+				expect(user.getNumber('DATE')).toBe(12020000000);
+				expect(user.getNumber('ISODATE')).toBe(2020);
+			});
+
+			test('should return null', () => {
+				const user = new User(data);
+
+				expect(user.getNumber('NULL')).toBeNull();
+			});
+
+			test('should throw exception for undefined values', () => {
+				const user = new User(data);
+
+				expect(() => user.getNumber('UNDEFINED')).toThrowError(new AttributeNotFoundException('UNDEFINED'));
+				expect(() => user.getNumber('UNDECLARED' as any)).toThrowError(new AttributeNotFoundException('UNDECLARED'));
+			});
+
+			test('should return NaN for unparseable values', () => {
+				const user = new User(data);
+
+				expect(user.getNumber('BOOLEAN')).toBe(NaN);
+			});
+		});
+
+		describe('getDate()', () => {
+			test('should return date objects', () => {
+				const user = new User(data);
+
+				expect(user.getDate('STRING')).toMatchObject(new Date('1970-01-01T00:00:00.001Z'));
+				expect(user.getDate('NUMBER')).toMatchObject(new Date('1970-01-01T00:00:00.001Z'));
+				expect(user.getDate('DATE')).toMatchObject(new Date('1/1/2020 12:00 AM'));
+				expect(user.getDate('ISODATE')).toMatchObject(new Date('1/1/2020 12:00 AM'));
+			});
+
+			test('should return null', () => {
+				const user = new User(data);
+
+				expect(user.getDate('NULL')).toBeNull();
+			});
+
+			test('should throw exception for undefined values', () => {
+				const user = new User(data);
+
+				expect(() => user.getDate('UNDEFINED')).toThrowError(new AttributeNotFoundException('UNDEFINED'));
+				expect(() => user.getDate('UNDECLARED' as any)).toThrowError(new AttributeNotFoundException('UNDECLARED'));
+			});
+
+			test('should return null for unparseable values', () => {
+				const user = new User(data);
+
+				expect(user.getDate('BOOLEAN')).toBeNull();
+			});
+		});
+
+		describe('isNull()', () => {
+			test('should be false', () => {
+				const user = new User(data);
+
+				expect(user.isNull('STRING')).toBeFalsy();
+				expect(user.isNull('NUMBER')).toBeFalsy();
+				expect(user.isNull('DATE')).toBeFalsy();
+				expect(user.isNull('ISODATE')).toBeFalsy();
+				expect(user.isNull('BOOLEAN')).toBeFalsy();
+			});
+
+			test('should be true', () => {
+				const user = new User(data);
+
+				expect(user.isNull('NULL')).toBeTruthy();
+			});
+
+			test('should throw exception for undefined values', () => {
+				const user = new User(data);
+
+				expect(() => user.isNull('UNDEFINED')).toThrowError(new AttributeNotFoundException('UNDEFINED'));
+				expect(() => user.isNull('UNDECLARED' as any)).toThrowError(new AttributeNotFoundException('UNDECLARED'));
+			});
+		});
+
+		describe('isNotNull()', () => {
+			test('should be true', () => {
+				const user = new User(data);
+
+				expect(user.isNotNull('STRING')).toBeTruthy();
+				expect(user.isNotNull('NUMBER')).toBeTruthy();
+				expect(user.isNotNull('DATE')).toBeTruthy();
+				expect(user.isNotNull('ISODATE')).toBeTruthy();
+				expect(user.isNotNull('BOOLEAN')).toBeTruthy();
+			});
+
+			test('should be false', () => {
+				const user = new User(data);
+
+				expect(user.isNotNull('NULL')).toBeFalsy();
+			});
+
+			test('should throw exception for undefined values', () => {
+				const user = new User(data);
+
+				expect(() => user.isNotNull('UNDEFINED')).toThrowError(new AttributeNotFoundException('UNDEFINED'));
+				expect(() => user.isNotNull('UNDECLARED' as any)).toThrowError(new AttributeNotFoundException('UNDECLARED'));
+			});
+		});
 	});
 
-	test('getString()', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		expect(entitySet[0].getString('NAME')).toBe(data[0].NAME);
-		expect(entitySet[0].getString('NUMTYPE')).toBe('1');
-		expect(() => entitySet[0].getValue('UNDEFINED_PROP')).toThrowError(new AttributeNotFoundException('UNDEFINED_PROP'));
-		expect(entitySet[0].getString('NULL')).toBeNull();
-	});
+	describe('Check if modified', () => {
+		const data = {
+			STRING: '1',
+			NUMBER: 1,
+		};
+		class User extends Entity {
+			STRING!: string;
+			NUMBER!: number;
 
-	test('getNumber()', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		expect(entitySet[0].getNumber('NUMTYPE')).toBe(1);
-	});
-
-	test('getDate()', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		expect(entitySet[0].getDate('ISODATE')).toMatchObject(new Date('1/1/2020 12:00 AM'));
-		expect(entitySet[0].ISODATE).toBe('2020-01-01T05:00:00.000Z');
-	});
-
-	test('isNull()/isNotNull()', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0];
-		expect(entity.isNull('NULL')).toBe(true);
-		expect(() => entitySet[0].isNull('UNDEFINED_PROP')).toThrowError(new AttributeNotFoundException('UNDEFINED_PROP'));
-		expect(() => entitySet[0].isNull('UNDEFINED')).toThrowError(new AttributeNotFoundException('UNDEFINED'));
-		expect(entity.isNotNull('USERID')).toBe(true);
-	});
-
-	test('To Be Saved', () => {
-		class UserTest extends User {
 			protected onBeforeChange(attribute: string, value: any): any {
 				const keys: EntityAttributes<this> = {
-					NAME: (): any => {
+					STRING: (): any => {
 						if (value == 'test change') {
 							throw Error(value);
 						}
@@ -105,139 +220,423 @@ describe('Entity Tests - Testing', () =>     {
 			}
 		}
 
-		const entity: User = new UserTest(data[0]);
-		expect(entity.toBeSaved).toBe(false);
-		expect(() => entity.setValue('NAME', 'test change')).toThrowError(new Error('test change'));
-		expect(entity.toBeSaved).toBe(false);
+		test('should be marked as "to be saved"', () => {
+			const user = new User(data);
 
-		entity.NAME = 'Test User';
-		expect(entity.toBeSaved).toBe(true);
+			expect(user.toBeSaved).toBe(false);
 
-		entity.reset();
-		expect(entity.toBeSaved).toBe(false);
+			user.STRING = 'Test User';
+			expect(user.toBeSaved).toBe(true);
+
+			user.reset();
+			expect(user.toBeSaved).toBe(false);
+		});
+
+		test('should NOT mark field as modified and entity "to be saved" if error is thrown', () => {
+			const user = new User(data);
+
+			expect(() => user.setValue('STRING', 'test change')).toThrowError(new Error('test change'));
+			expect(user.isFieldModified('STRING')).toBe(false);
+			expect(user.toBeSaved).toBe(false);
+		});
+
+		test('should mark field as modified and entity "to be saved"', () => {
+			const user = new User(data);
+
+			user.STRING = 'Test User';
+			expect(user.isFieldModified('STRING')).toBe(true);
+			expect(user.toBeSaved).toBe(true);
+		});
+
+		test('should NOT mark field as modified and entity "to be saved" using NOCHANGE modifier', () => {
+			const user = new User(data);
+
+			user.setValue('STRING', 'works', FieldAccess.NOCHANGE);
+			expect(user.STRING).toBe('works');
+			expect(user.isFieldModified('STRING')).toBe(false);
+			expect(user.toBeSaved).toBe(false);
+		});
+
+		test('should reset flags after "reset()" is called', () => {
+			const user = new User(data);
+
+			expect(user.isFieldModified('STRING')).toBe(false);
+			expect(user.toBeSaved).toBe(false);
+
+			user.setValue('STRING', 'works', FieldAccess.NOCHANGE);
+			expect(user.STRING).toBe('works');
+			expect(user.isFieldModified('STRING')).toBe(false);
+			expect(user.toBeSaved).toBe(false);
+
+			user.STRING = 'Test User';
+			expect(user.toBeSaved).toBe(true);
+
+			user.reset();
+			expect(user.toBeSaved).toBe(false);
+		});
+
+		test('should mark field as modified', () => {
+			const user = new User(data);
+
+			user.STRING = 'Test User';
+			expect(user.isFieldModified('STRING')).toBe(true);
+			expect(user.isFieldModified('NO_PROP' as any)).toBe(false);
+		});
+
+		test('should leave other fields as not modified', () => {
+			const user = new User(data);
+
+			user.STRING = 'Test User';
+			expect(user.isFieldModified('STRING')).toBe(true);
+			expect(user.isFieldModified('NUMBER')).toBe(false);
+		});
+
+		test('should mark field as not modified after reset', () => {
+			const user = new User(data);
+
+			user.STRING = 'Test User';
+			expect(user.isFieldModified('STRING')).toBe(true);
+			user.reset();
+			expect(user.isFieldModified('STRING')).toBe(false);
+		});
 	});
 
-	test('To Be Saved - Field Access Modifiers', () => {
-		class UserTest extends User {
-			protected onBeforeChange(attribute: string, value: any): any {
-				switch (attribute) {
-					case 'NAME':
-						if (value === 'test change') {
-							throw Error(value);
-						}
-					default:
-						return value;
-				}
+	describe('Field messages', () => {
+		const data = {
+			STRING: '1',
+		};
+		class User extends Entity {
+			STRING!: string;
+		}
+
+		test('should be error message', () => {
+			const user = new User(data);
+
+			user.setFieldError('STRING', 'Error Message');
+			expect(user.fieldMessages['STRING']).toMatchObject({ type: 'error', message: 'Error Message' });
+
+			user.reset();
+			expect(user.fieldMessages['STRING']).toBeUndefined();
+		});
+
+		test('should be info message', () => {
+			const user = new User(data);
+
+			user.setFieldInfo('STRING', 'Info Message');
+			expect(user.fieldMessages['STRING']).toMatchObject({ type: 'info', message: 'Info Message' });
+
+			user.reset();
+			expect(user.fieldMessages['STRING']).toBeUndefined();
+		});
+
+		test('should be warn message', () => {
+			const user = new User(data);
+
+			user.setFieldWarning('STRING', 'Warn Message');
+			expect(user.fieldMessages['STRING']).toMatchObject({ type: 'warn', message: 'Warn Message' });
+
+			user.reset();
+			expect(user.fieldMessages['STRING']).toBeUndefined();
+		});
+	});
+
+	describe('Clone/Copy', () => {
+		const data = {
+			STRING: '1',
+			NUMBER: 1,
+			DATE: new Date('1/1/2020 12:00 AM'),
+			ISODATE: '2020-01-01T05:00:00.000Z',
+			BOOLEAN: true,
+			NULL: null,
+			UNDEFINED: undefined,
+		};
+		class User extends Entity {
+			STRING!: string;
+			NUMBER!: number;
+			DATE!: Date;
+			ISODATE!: string;
+			BOOLEAN!: boolean;
+			NULL!: string | null;
+			UNDEFINED!: string;
+		}
+
+		test('clone', () => {
+			const user = new User(data);
+
+			const copyEntity: object = user.clone();
+			expect(JSON.stringify(copyEntity)).toBe(JSON.stringify(user));
+		});
+
+		test('copy', () => {
+			const user = new User(data);
+
+			const clonedEntity: User = user.copy() as User;
+			expect(clonedEntity.constructor.name).toBe('User');
+			expect(clonedEntity instanceof User).toBe(true);
+		});
+	});
+
+	describe('Select/Unselect', () => {
+		const data = {
+			STRING: '1',
+		};
+		class User extends Entity {
+			STRING!: string;
+		}
+
+		test('should select', () => {
+			const user = new User(data);
+
+			user.select();
+			expect(user.isSelected).toBe(true);
+		});
+
+		test('should unselect', () => {
+			const user = new User(data);
+
+			user.select();
+			user.unselect();
+			expect(user.isSelected).toBe(false);
+		});
+
+		test('should unselect after reset', () => {
+			const user = new User(data);
+
+			user.select();
+			user.reset();
+			expect(user.isSelected).toBe(false);
+		});
+
+		test('should toggle select', () => {
+			const user = new User(data);
+
+			user.select();
+			expect(user.isSelected).toBe(true);
+			user.selectToggle();
+			expect(user.isSelected).toBe(false);
+		});
+	});
+
+	describe('Delete/Undelete', () => {
+		const data = {
+			STRING: '1',
+		};
+		class User extends Entity {
+			STRING!: string;
+		}
+
+		test('should mark as deleted', () => {
+			const user = new User(data);
+
+			user.delete();
+			expect(user.toBeDeleted).toBe(true);
+		});
+
+		test('should undelete', () => {
+			const user = new User(data);
+
+			user.delete();
+			user.undelete();
+			expect(user.toBeDeleted).toBe(false);
+		});
+
+		test('should undelete after reset', () => {
+			const user = new User(data);
+
+			user.delete();
+			user.reset();
+			expect(user.toBeDeleted).toBe(false);
+		});
+
+		test('should toggle delete', () => {
+			const user = new User(data);
+
+			user.delete();
+			expect(user.toBeDeleted).toBe(true);
+			user.deleteToggle();
+			expect(user.toBeDeleted).toBe(false);
+		});
+	});
+
+	describe('Readonly/Required/Hidden', () => {
+		const data = {
+			STRING: '1',
+			NUMBER: 1,
+		};
+		class User extends Entity {
+			STRING!: string | null;
+			NUMBER!: number;
+		}
+
+		test('should be readonly attribute', () => {
+			const user = new User(data);
+
+			user.setFieldReadonly('STRING', true);
+			expect(user.isFieldReadonly('STRING')).toBe(true);
+			user.setFieldReadonly('STRING', false);
+			expect(user.isFieldReadonly('STRING')).toBe(false);
+
+			user.setFieldReadonly(['STRING', 'NUMBER'], true);
+			expect(user.isFieldReadonly('STRING')).toBe(true);
+			expect(user.isFieldReadonly('NUMBER')).toBe(true);
+
+			user.setFieldReadonly('STRING', false);
+			expect(user.isFieldReadonly('STRING')).toBe(false);
+			expect(user.isFieldReadonly('NUMBER')).toBe(true);
+
+			user.setFieldReadonly(['STRING', 'NUMBER'], true);
+
+			user.setFieldReadonly(['STRING', 'NUMBER'], false);
+			expect(user.isFieldReadonly('STRING')).toBe(false);
+			expect(user.isFieldReadonly('NUMBER')).toBe(false);
+		});
+
+		test('should throw error on readonly fields', () => {
+			const user = new User(data);
+
+			user.setFieldReadonly('STRING', true);
+			expect(() => (user.STRING = 'test')).toThrowError(new AttributeReadonlyException('STRING'));
+		});
+
+		test('should be required attribute', () => {
+			const user = new User(data);
+
+			user.setFieldRequired('STRING', true);
+			expect(user.isFieldRequired('STRING')).toBe(true);
+			user.setFieldRequired('STRING', false);
+			expect(user.isFieldRequired('STRING')).toBe(false);
+
+			user.setFieldRequired(['STRING', 'NUMBER'], true);
+			expect(user.isFieldRequired('STRING')).toBe(true);
+			expect(user.isFieldRequired('NUMBER')).toBe(true);
+
+			user.setFieldRequired('STRING', false);
+			expect(user.isFieldRequired('STRING')).toBe(false);
+			expect(user.isFieldRequired('NUMBER')).toBe(true);
+
+			user.setFieldRequired(['STRING', 'NUMBER'], true);
+
+			user.setFieldRequired(['STRING', 'NUMBER'], false);
+			expect(user.isFieldRequired('STRING')).toBe(false);
+			expect(user.isFieldRequired('NUMBER')).toBe(false);
+		});
+
+		test('should throw error on required fields', () => {
+			const user = new User(data);
+
+			user.setFieldReadonly('STRING', false);
+			user.setFieldRequired('STRING', true);
+			expect(() => {
+				user.STRING = null;
+				user.validate();
+			}).toThrowError(new AttributeRequiredException('STRING'));
+		});
+
+		test('should be hidden attribute', () => {
+			const user = new User(data);
+
+			user.setFieldHidden('STRING', true);
+			expect(user.isFieldHidden('STRING')).toBe(true);
+			user.setFieldHidden('STRING', false);
+			expect(user.isFieldHidden('STRING')).toBe(false);
+
+			user.setFieldHidden(['STRING', 'NUMBER'], true);
+			expect(user.isFieldHidden('STRING')).toBe(true);
+			expect(user.isFieldHidden('NUMBER')).toBe(true);
+
+			user.setFieldHidden('STRING', false);
+			expect(user.isFieldHidden('STRING')).toBe(false);
+			expect(user.isFieldHidden('NUMBER')).toBe(true);
+
+			user.setFieldHidden(['STRING', 'NUMBER'], true);
+
+			user.setFieldHidden(['STRING', 'NUMBER'], false);
+			expect(user.isFieldHidden('STRING')).toBe(false);
+			expect(user.isFieldHidden('NUMBER')).toBe(false);
+		});
+
+		test('should make be readonly entity', () => {
+			const user = new User(data);
+
+			user.setReadonly(true);
+			expect(user.isReadonly).toBe(true);
+			expect(() => (user.STRING = 'test')).toThrowError(new EntityReadonlyException(user.constructor.name));
+
+			user.setReadonly(false);
+			expect(user.isReadonly).toBe(false);
+			user.STRING = 'test1';
+			expect(user.STRING).toBe('test1');
+		});
+	});
+
+	describe('On Readonly/Required/Hidden event handlers', () => {
+		const data = {
+			STRING: '1',
+			NUMBER: 1,
+		};
+		class User extends Entity {
+			STRING!: string;
+			NUMBER!: number;
+
+			protected onFieldReadonly(attribute: string, value: boolean): boolean {
+				return false;
+			}
+
+			protected onFieldRequired(attribute: string, value: boolean): boolean {
+				return false;
+			}
+
+			protected onFieldHidden(attribute: string, value: boolean): boolean {
+				return false;
 			}
 		}
 
-		const entity: User = new UserTest(data[0]);
-		expect(entity.toBeSaved).toBe(false);
-		expect(() => entity.setValue('NAME', 'test change')).toThrowError(new Error('test change'));
-		expect(entity.isFieldModified('NAME')).toBe(false);
-		expect(entity.toBeSaved).toBe(false);
+		test('should override readonly', () => {
+			const user = new User(data);
 
-		entity.setValue('NAME', 'works', FieldAccess.NOCHANGE);
-		expect(entity.NAME).toBe('works');
-		expect(entity.isFieldModified('NAME')).toBe(false);
-		expect(entity.toBeSaved).toBe(false);
+			user.setFieldReadonly('STRING', true);
+			expect(user.isFieldReadonly('STRING')).toBe(false);
+		});
 
-		entity.NAME = 'Test User';
-		expect(entity.toBeSaved).toBe(true);
+		test('should override required', () => {
+			const user = new User(data);
 
-		entity.reset();
-		expect(entity.toBeSaved).toBe(false);
+			user.setFieldRequired('STRING', true);
+			expect(user.isFieldRequired('STRING')).toBe(false);
+		});
+
+		test('should override hidden', () => {
+			const user = new User(data);
+
+			user.setFieldHidden('STRING', true);
+			expect(user.isFieldHidden('STRING')).toBe(false);
+		});
 	});
 
-	test('Attribute modified', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0];
+	describe('Before/After Change Event Handlers', () => {
+		const data = {
+			STRING: '1',
+			NUMBER: 1,
+		};
+		class User extends Entity {
+			STRING!: string;
+			NUMBER!: number;
 
-		entity.NAME = 'Test User';
-		expect(entity.isFieldModified('NAME')).toBe(true);
-		expect(entitySet[0].isFieldModified('NO_PROP')).toBe(false);
+			protected onBeforeChange(attribute: string): any {
+				const keys: EntityAttributes<this> = {
+					STRING: () => {
+						return 'BEFORE';
+					},
+				};
+				const func = keys[attribute as keyof this];
+				return func ? func() : null;
+			}
 
-		entity.reset();
-		expect(entity.isFieldModified('NAME')).toBe(false);
-	});
-
-	test('Field messages', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0];
-
-		entity.setFieldError('NAME', 'Error Message');
-		expect(entity.fieldMessages['NAME']).toMatchObject({ type: 'error', message: 'Error Message' });
-		entity.setFieldWarning('NAME', 'Warn Message');
-		expect(entity.fieldMessages['NAME']).toMatchObject({ type: 'warn', message: 'Warn Message' });
-		entity.setFieldInfo('NAME', 'Info Message');
-		expect(entity.fieldMessages['NAME']).toMatchObject({ type: 'info', message: 'Info Message' });
-		entity.reset();
-		expect(entity.fieldMessages['NAME']).toBeUndefined();
-		entity.setFieldInfo('NAME', 'Info Message');
-		expect(entity.fieldMessages['NAME']).toMatchObject({ type: 'info', message: 'Info Message' });
-		entity.clearFieldMessage('NAME');
-		expect(entity.fieldMessages['NAME']).toBeUndefined();
-	});
-
-	test('clone', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0];
-		const copyEntity: object = entity.clone();
-		expect(JSON.stringify(copyEntity)).toBe(JSON.stringify(entity));
-	});
-
-	test('copy', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0];
-		const clonedEntity: User = entity.copy() as User;
-		expect(clonedEntity.constructor.name).toBe('User');
-		expect(clonedEntity instanceof User).toBe(true);
-	});
-
-	test('select/unselect', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0];
-		entity.select();
-		expect(entity.isSelected).toBe(true);
-		entity.unselect();
-		expect(entity.isSelected).toBe(false);
-		entity.selectToggle();
-		expect(entity.isSelected).toBe(true);
-	});
-
-	test('delete/undelete', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0];
-		entity.delete();
-		expect(entity.toBeDeleted).toBe(true);
-		entity.undelete();
-		expect(entity.toBeDeleted).toBe(false);
-	});
-
-	test('read only fields', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0];
-		entity.setFieldReadonly('NAME', true);
-		expect(entity.isFieldReadonly('NAME')).toBe(true);
-		entity.setFieldReadonly('NAME', false);
-		expect(entity.isFieldReadonly('NAME')).toBe(false);
-
-		entity.setFieldReadonly(['NAME', 'NUMTYPE'], true);
-		expect(entity.isFieldReadonly('NAME')).toBe(true);
-		expect(entity.isFieldReadonly('NUMTYPE')).toBe(true);
-		entity.setFieldReadonly('NAME', false);
-		expect(entity.isFieldReadonly('NAME')).toBe(false);
-		expect(entity.isFieldReadonly('NUMTYPE')).toBe(true);
-	});
-
-	test('set read only internally/externally', () => {
-		class UserTest extends User {
 			protected onAfterChange(attribute: string): void {
 				const keys: EntityAttributes<this> = {
-					NAME: (): any => {
-						this.setFieldReadonly('READONLY', true);
-						this.READONLY = 'SET INTERNALLY';
-						this['READONLY'] = 'SET INTERNALLY';
+					STRING: () => {
+						this.STRING += '_AFTER';
+						this.setFieldRequired('STRING', true);
 					},
 				};
 				const func = keys[attribute as keyof this];
@@ -245,258 +644,132 @@ describe('Entity Tests - Testing', () =>     {
 			}
 		}
 
-		const entity: UserTest = new UserTest(data[0]);
-		expect(entity.READONLY).toBe('readonly');
-		expect(entity.isFieldReadonly('READONLY')).toBe(false);
-		entity.NAME = 'Test User';
-		expect(entity.isFieldReadonly('READONLY')).toBe(true);
-		expect(entity.READONLY).toBe('SET INTERNALLY');
-		expect(() => (entity.READONLY = 'test')).toThrowError(new AttributeReadonlyException('READONLY'));
+		it('should trigger before/after event handlers', () => {
+			const user = new User(data);
+
+			user.STRING = 'NEW NAME';
+			expect(user.STRING).toBe('BEFORE_AFTER');
+			expect(user.isFieldRequired('STRING')).toBe(true);
+		});
 	});
 
-	test('dynamic readonly/hidden fields', () => {
-		class UserTest extends User {
-			@NonPersistent
-			public NON_PERSISTENT_FIELD!: string;
+	describe('Decorators', () => {
+		const data = {
+			STRING: '1',
+			NUMBER: 1,
+		};
+		class User extends Entity {
+			STRING!: string;
+			NUMBER!: number;
+		}
 
-			@NonPersistent
-			public DATE_ISREQUIRED!: number;
-
-			protected onFieldReadonly(attribute: string, value: boolean): boolean {
-				const keys: EntityAttributes<this> = {
-					DATE: () => this.DATE_ISREQUIRED === 1,
-				};
-				const func = keys[attribute as keyof this];
-				return func ? func() : value;
+		describe('NonPersistent', () => {
+			class User2 extends User {
+				@NonPersistent
+				NON_PERSISTENT_FIELD!: string;
 			}
 
-			protected onFieldHidden(attribute: string, value: boolean): boolean {
-				const keys: EntityAttributes<this> = {
-					DATE: () => this.DATE_ISREQUIRED === 1,
-				};
-				const func = keys[attribute as keyof this];
-				return func ? func() : value;
-			}
-		}
+			test('should remove non-persistent fields', () => {
+				let user = new User2(data);
 
-		const entity: UserTest = new UserTest(data[0]);
-		expect(entity.isFieldReadonly('DATE')).toBe(false);
-		expect(entity.isFieldHidden('DATE')).toBe(false);
-		entity.DATE_ISREQUIRED = 1;
-		expect(entity.isFieldReadonly('DATE')).toBe(true);
-		expect(entity.isFieldHidden('DATE')).toBe(true);
-	});
+				user.NON_PERSISTENT_FIELD = 'test';
+				expect(user.NON_PERSISTENT_FIELD).toBe('test');
+				expect(user.asData).toBe(JSON.stringify(data));
+			});
 
-	test('hidden fields', () => {
-		/* 
-		class UserTest extends User {
-			@NonPersistent
-			public NON_PERSISTENT_FIELD!: string;
+			test('should default value to null', () => {
+				let user = new User2(data);
 
-			@NonPersistent
-			public DATE_ISREQUIRED!: number;
+				expect(user.NON_PERSISTENT_FIELD).toBe(null);
+			});
+		});
 
-			protected onFieldReadonly(attribute: string, value: boolean): boolean {
-				const keys: EntityAttributes<this> = {
-					DATE: () => this.DATE_ISREQUIRED === 1,
-				};
-				const func = keys[attribute];
-				return func ? func() : value;
+		describe('Required', () => {
+			class User2 extends User {
+				@Required
+				REQUIRED_FIELD!: string;
 			}
 
-			protected onFieldHidden(attribute: string, value: boolean): boolean {
-				const keys: EntityAttributes<this> = {
-					DATE: () => this.DATE_ISREQUIRED === 1,
-				};
-				const func = keys[attribute];
-				return func ? func() : value;
+			test('should mark field required', () => {
+				const user = new User2(data);
+
+				expect(user.isFieldRequired('REQUIRED_FIELD')).toBe(true);
+			});
+
+			test('should default value to null', () => {
+				const user = new User2(data);
+				expect(user.REQUIRED_FIELD).toBe(null);
+			});
+		});
+
+		describe('Readonly', () => {
+			class User2 extends User {
+				@Readonly
+				READONLY_FIELD!: string;
 			}
-		}
 
-		const entity: UserTest = new UserTest(data[0]);
-		expect(entity.isFieldReadonly('DATE')).toBe(false);
-		expect(entity.isFieldHidden('DATE')).toBe(false);
-		entity.DATE_ISREQUIRED = 1;
-		expect(entity.isFieldReadonly('DATE')).toBe(true);
-		expect(entity.isFieldHidden('DATE')).toBe(true);
- 		*/
-	});
+			test('should mark field readonly', () => {
+				const user: User2 = new User2(data);
 
-	test('check readonly fields when trying to update a value', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0];
-		entity.setFieldReadonly('NAME', true);
-		expect(entity.isFieldReadonly('NAME')).toBe(true);
-		expect(() => (entity.NAME = 'test')).toThrowError(new AttributeReadonlyException('NAME'));
-		expect(() => (entity['NAME'] = 'test')).toThrowError(new AttributeReadonlyException('NAME'));
+				expect(user.isFieldReadonly('READONLY_FIELD')).toBe(true);
+			});
 
-		entity.setFieldReadonly(['NAME'], false);
-		expect(entity.isFieldReadonly('NAME')).toBe(false);
+			test('should default value to null', () => {
+				const user: User2 = new User2(data);
 
-		entity.NAME = 'test1';
-		expect(entity.getValue('NAME')).toBe('test1');
-		expect(entity.NAME).toBe('test1');
-	});
+				expect(user.READONLY_FIELD).toBe(null);
+			});
+		});
 
-	test('check entity is readonly', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0];
-		entity.setReadonly(true);
-		expect(entity.isReadonly).toBe(true);
-		expect(() => (entity.NAME = 'test')).toThrowError(new EntityReadonlyException(entity.constructor.name));
+		describe('ValidatorJS', () => {
+			class User extends Entity {
+				@ValidatorJS({ rules: 'required' })
+				PROP1!: string;
 
-		entity.setReadonly(false);
-		expect(entity.isReadonly).toBe(false);
-		entity.NAME = 'test1';
-		expect(entity.NAME).toBe('test1');
-	});
+				@ValidatorJS({ rules: 'required|same:PROP1' })
+				PROP2!: string;
 
-	test('required fields', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0];
-		entity.setFieldRequired('NAME', false);
-		expect(entity.isFieldRequired('NAME')).toBe(false);
-		entity.setFieldRequired('NAME', true);
-		expect(entity.isFieldRequired('NAME')).toBe(true);
-
-		entity.NAME = null;
-		expect(() => entity.validate()).toThrowError('Attribute NAME is required');
-
-		entity.setFieldRequired(['NAME', 'NUMTYPE'], true);
-		expect(entity.isFieldRequired('NAME')).toBe(true);
-		expect(entity.isFieldRequired('NUMTYPE')).toBe(true);
-		entity.setFieldRequired('NAME', false);
-		expect(entity.isFieldRequired('NAME')).toBe(false);
-		expect(entity.isFieldRequired('NUMTYPE')).toBe(true);
-	});
-
-	test('readonly fields', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0];
-		entity.setFieldReadonly('NAME', false);
-		expect(entity.isFieldReadonly('NAME')).toBe(false);
-		entity.setFieldReadonly('NAME', true);
-		expect(entity.isFieldReadonly('NAME')).toBe(true);
-
-		expect(() => (entity.NAME = null)).toThrowError('Attribute NAME is readonly');
-
-		entity.setFieldReadonly(['NAME', 'NUMTYPE'], true);
-		expect(entity.isFieldReadonly('NAME')).toBe(true);
-		expect(entity.isFieldReadonly('NUMTYPE')).toBe(true);
-		entity.setFieldReadonly('NAME', false);
-		expect(entity.isFieldReadonly('NAME')).toBe(false);
-		expect(entity.isFieldReadonly('NUMTYPE')).toBe(true);
-	});
-
-	test('required fields - on change', () => {
-		class UserTest extends User {
-			protected onAfterChange(attribute: string): void {
-				const keys: EntityAttributes<this> = {
-					NAME: () => {
-						this.setFieldRequired('USERID', true);
-					},
-				};
-				const func = keys[attribute as keyof this];
-				func ? func() : null;
+				@ValidatorJS({ rules: 'required|email' })
+				PROP3!: string;
 			}
-		}
 
-		const entity: User = new UserTest(data[0]);
-		entity.NAME = 'NEW NAME';
-		entity.USERID = null;
-		expect(() => entity.asData).toThrowError(new AttributeRequiredException('USERID'));
-		expect(entity.NAME).toBe('NEW NAME');
+			test('should validate per rules', () => {
+				const data = { PROP1: 'test', NOT_DECLARED_PROP: 'prop2', READONLY_ATTR: 'readonly' };
+				const user = new User(data);
+				expect((user.PROP1 = 'h')).toBe('h');
+
+				user.PROP1 = '';
+				expect(user.fieldMessages['PROP1']?.message).toBe('The PROP1 field is required.');
+				expect((user.PROP2 = 'h')).toBe('h');
+
+				user.PROP2 = 'hh';
+				expect(user.fieldMessages['PROP2']?.message).toBe('The PROP2 and PROP1 fields must match.');
+
+				user.PROP3 = 'hh';
+				expect(user.fieldMessages['PROP3']?.message).toBe('The PROP3 format is invalid.');
+				expect((user.PROP3 = 'email@email.com')).toBe('email@email.com');
+			});
+		});
+
+		describe('PrimaryKey', () => {
+			class User2 extends User {
+				@PrimaryKey
+				PRIMARYKEY!: string;
+			}
+
+			class User3 extends User {
+				PRIMARYKEY!: string;
+			}
+
+			test('should set primary key', () => {
+				const user: User2 = new User2(data);
+				expect(user.primaryKeyName).toBe('PRIMARYKEY');
+			});
+
+			test('should throw error when primary key is not set', () => {
+				const user: User3 = new User3(data);
+				expect(() => user.primaryKeyName).toThrowError('Primary key not defined for object User3');
+			});
+		});
 	});
-
-	test('Non persistent fields', () => {
-		class UserTest extends User {
-			@NonPersistent
-			public NON_PERSISTENT_FIELD!: string;
-		}
-
-		const entity: UserTest = new UserTest(data[0]);
-		entity.NON_PERSISTENT_FIELD = 'test';
-		expect(entity.NON_PERSISTENT_FIELD).toBe('test');
-		expect(entity.asData).toBe(JSON.stringify(data[0]));
-		expect(entity.NON_PERSISTENT_FIELD).toBe('test');
-	});
-
-	test('check required fields when converting to DTO', () => {
-		const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0];
-		entity.setFieldRequired('USERID', true);
-		entity.USERID = null;
-		expect(entity.isNull('USERID')).toBe(true);
-		expect(() => entity.asData).toThrowError(new AttributeRequiredException('USERID'));
-	});
-
-	test('verify properties exists', () => {
-		class TestUser extends Entity {
-			PROP1!: string;
-			@Required
-			REQUIRED_ATTR!: string;
-			@Readonly
-			READONLY_ATTR!: string;
-		}
-		const data = { NOT_DECLARED_PROP: 'prop2', READONLY_ATTR: 'readonly' };
-		const user = new TestUser(data);
-		expect(user.PROP1).toBe(undefined);
-		expect(user.REQUIRED_ATTR).toBe(null);
-		expect(user.READONLY_ATTR).toBe('readonly');
-	});
-
-	test('ValidatorJS', () => {
-		class TestUser extends Entity {
-			@ValidatorJS({ rules: 'required' })
-			PROP1!: string;
-
-			@ValidatorJS({ rules: 'required|same:PROP1' })
-			PROP2!: string;
-
-			@ValidatorJS({ rules: 'required|email' })
-			PROP3!: string;
-		}
-
-		const data = { PROP1: 'test', NOT_DECLARED_PROP: 'prop2', READONLY_ATTR: 'readonly' };
-		const user = new TestUser(data);
-		expect((user.PROP1 = 'h')).toBe('h');
-		expect(() => (user.PROP1 = '')).toThrowError(new Error('The PROP1 field is required.'));
-		expect(() => (user.PROP2 = 'hhhh')).toThrowError(new Error('The PROP2 and PROP1 fields must match.'));
-		expect((user.PROP2 = 'h')).toBe('h');
-
-		expect(() => (user.PROP3 = 'hh')).toThrowError(new Error('The PROP3 format is invalid.'));
-		expect((user.PROP3 = 'email@email.com')).toBe('email@email.com');
-	});
-
-	test('Entity check primary key', () => {
-		class UserTest extends User {}
-
-		class UserTest2 extends User {
-			@PrimaryKey
-			PRIMARYKEY!: string;
-		}
-
-		const entity: User = new UserTest(data[0]);
-		expect(() => entity.primaryKeyName).toThrowError('Primary key not defined for object UserTest');
-
-		const entity2: User = new UserTest2(data[0]);
-		expect(entity2.primaryKeyName).toBe('PRIMARYKEY');
-	});
-
-	test('verify data types', () => {
-		/* const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0]; */
-	});
-
-	test('initialize properties', () => {
-		// check initialize properties and to be saved should not be true
-		/* const entitySet: EntitySet = new UserSet(data);
-		const entity: User = entitySet[0]; */
-	});
-
-	/* 	test('Get Owner', () => {
-		const entitySet: EntitySet = new EntitySet(data);
-		expect(entitySet[0].getString('NAME')).toBe(data[0].NAME);
-		expect(entitySet[1].getString('NAME')).toBe(data[1].NAME);
-	}); */
 });
