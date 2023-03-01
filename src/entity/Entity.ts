@@ -491,7 +491,7 @@ export class Entity {
 	 */
 	public validate(): void {
 		if (this.toBeSaved === true) {
-			Object.keys({ ...this }).forEach((key) => {
+			Object.keys({ ...this }).map((key) => {
 				if (this.requiredFields[key] && this.isNull(key as any)) {
 					throw new AttributeRequiredException(key);
 				}
@@ -729,7 +729,7 @@ export class Entity {
 	 */
 	private validateField(attribute: string, value: any): boolean {
 		try {
-			Object.keys(this.attributeValidators).forEach((k) => {
+			Object.keys(this.attributeValidators).map((k) => {
 				const [validator, ...args] = this.attributeValidators[k];
 				if (typeof validator === 'function') {
 					const param: ValidatorArgType[] = (args as ValidatorArgType[]).filter((a) => a.property === attribute);
@@ -759,11 +759,11 @@ export class Entity {
 			excludeValues.push(exclude);
 		}
 
-		Object.keys(this.modifiedFields)
-			.filter((k) => excludeValues.indexOf(k) === -1)
-			.forEach((k) => {
+		Object.keys(this.modifiedFields).map((k) => {
+			if (excludeValues.indexOf(k) === -1) {
 				this.validateField(k, this[k as keyof this]);
-			});
+			}
+		});
 	}
 
 	/**

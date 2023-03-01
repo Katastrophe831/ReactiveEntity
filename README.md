@@ -43,8 +43,8 @@ class User extends Entity {
 
 const user = new User(userData);
 
-console.log(user.FIRSTNAME); // 'John'
-console.log(user.getString('FIRSTNAME')); // 'John'
+user.FIRSTNAME; // 'John'
+user.getString('FIRSTNAME'); // 'John'
 ```
 
 # Rich Domain Logic (Business Logic)
@@ -73,8 +73,8 @@ All of the business logic can be contained within the Entity and your entities c
 ```typescript
 user.FIRSTNAME = 'Jane';
 
-console.log(user.toBeSaved) // true
-console.log(user.isFieldModified('FIRSTNAME')) // true
+user.toBeSaved; // true
+user.isFieldModified('FIRSTNAME'); // true
 ```
 # Readonly / Required Fields
 
@@ -204,10 +204,10 @@ class User extends Entity {
 }
 
 user.FIRSTNAME = 'Joe';
-console.log(user.FIRSTNAME) // Joe
+user.FIRSTNAME; // Joe
 
 user.FIRSTNAME = 'Jane';
-console.log(user.FIRSTNAME) // Jane is awesome
+user.FIRSTNAME; // Jane is awesome
 ```
 
 ### After Change
@@ -458,7 +458,7 @@ user.validate(); // Throws required field exception
 
 # Inheritance
 
-In enterprise applications there are times when you build out of the box base models and then extend them on a per-client requierment.  Therefore, multiple inheritance is a forethought during the inital design.
+In enterprise applications, there are times when you build out of the box base models and then extend them on a per-client requierment.
 
 ```typescript
 class User extends Entity {
@@ -501,7 +501,7 @@ class Gamer extends User {
 }
 
 user.FIRSTNAME = "Jane";
-console.log(user.FIRSTNAME); // GI Jane is awesome!
+user.FIRSTNAME; // GI Jane is awesome!
 ```
 
 # Field Exception Handling

@@ -55,7 +55,7 @@ describe('Utils Tests', () => {
 		expect(Utils.isNumber('b1 200,2', 'fr-FR')).toBe(false);
 	});
 
-	test('should get all keys from an object and conver them to null', () => {
+	test('should get all keys from an object and convert them to null', () => {
 		const thisObject = {
 			KEY1: true,
 			KEY2: true,
@@ -68,18 +68,19 @@ describe('Utils Tests', () => {
 	});
 
 	test('should take two objects and return an object with only keys that dont exist', () => {
-		const newObject = {
+		const existingObject = {
 			EXISTS1: true,
 			EXISTS2: true,
 			DOESNOTEXIST: true,
 		};
-		const existing = {
+		const remove = {
 			EXISTS1: '1',
 			EXISTS2: '1',
+			EXISTS3: '1',
 		};
 		const keysThatDontExist = {
 			DOESNOTEXIST: true,
 		};
-		expect(Utils.getKeysThatDontExist(newObject, existing)).toMatchObject(keysThatDontExist);
+		expect(Utils.getKeysThatDontExist(existingObject, remove)).toMatchObject(keysThatDontExist);
 	});
 });

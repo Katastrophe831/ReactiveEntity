@@ -103,24 +103,20 @@ export class Utils {
 	 */
 	static getObjectFromKeys(obj: { [key: string]: boolean }): any {
 		const props: any = {};
-		for (const key in obj) {
-			if (obj.hasOwnProperty(key)) {
-				props[key] = null;
-			}
-		}
+		Object.keys(obj).map((k) => (props[k] = null));
 		return props;
 	}
 
 	/**
 	 * Return an object with only the keys that don't exist
-	 * @param newObject
-	 * @param existing
+	 * @param object
+	 * @param remove
 	 * @returns
 	 */
-	static getKeysThatDontExist(newObject: { [key: string]: boolean }, existing: any): {} {
-		Object.keys(newObject)
-			.filter((k) => existing[k] !== null && existing[k] !== undefined) // check if existing object already has the key defined
-			.forEach((k) => delete newObject[k]);
-		return newObject;
+	static getKeysThatDontExist(object: { [key: string]: any }, remove: { [key: string]: any }): {} {
+		Object.keys(object)
+			.filter((k) => remove.hasOwnProperty(k))
+			.map((k) => delete object[k]);
+		return object;
 	}
 }
