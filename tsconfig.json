@@ -2,13 +2,15 @@
   "compilerOptions": {
     "baseUrl": "./",
     "target": "es2015",
-    "module": "commonjs",
+    "module": "esnext",
     "declaration": true,
     "outDir": "./lib",
     "strict": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
     "paths": {
       "@ReactiveEntity": [
         "src/entity"

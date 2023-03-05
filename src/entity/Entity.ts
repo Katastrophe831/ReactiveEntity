@@ -1,3 +1,4 @@
+import { TranslationCache } from '../i18n';
 import { Utils } from '../utils';
 import {
 	EntityArgs,
@@ -11,6 +12,7 @@ import {
 	ValidatorCallbackType,
 	ValidatorArgType,
 	FieldAccess,
+	ValidatorCallbackParams,
 } from '.';
 import {
 	AttributeNotFoundException,
@@ -53,7 +55,13 @@ export class Entity {
 
 		Object.assign(this, data, this.metaData.getUndeclaredProperties(data));
 
+		this.cacheTranslationKeys();
+
 		return new Proxy(this, this.proxyHandler);
+	}
+
+	public get name(): string {
+		return this.constructor.name;
 	}
 
 	/**
@@ -76,11 +84,7 @@ export class Entity {
 	public get primaryKeyName(): string {
 		const value = this.metaData.primaryKeyName;
 		if (value === null) {
-			throw new EntityException(
-				this.constructor.name,
-				'entity#primarykeynotfound',
-				'Primary key not defined for object {{0}}',
-			);
+			throw new EntityException(this.name, 'entity#primarykeynotfound', 'Primary key not defined for object {{0}}');
 		}
 		return value;
 	}
@@ -271,7 +275,7 @@ export class Entity {
 	 * @param attribute
 	 */
 	public registerAttributeName(attribute: string): void {
-		this.metaData.registerAttributeName(attribute as any);
+		this.metaData.registerAttributeName(attribute);
 	}
 
 	/**
@@ -288,6 +292,16 @@ export class Entity {
 			);
 		}
 		this.metaData.setPrimaryKeyName(attribute as string);
+	}
+
+	/**
+	 * Get attribute label per language
+	 * @param attribute
+	 * @returns
+	 */
+	public getLabel<K extends keyof this>(attribute: K, lang: string = 'en'): string {
+		const label = TranslationCache.getInstance().addEntityAttributeTranslation(this, attribute as string, lang);
+		return label;
 	}
 
 	/**
@@ -411,7 +425,7 @@ export class Entity {
 	 * @param attribute
 	 */
 	public hasFieldMessage<K extends keyof this>(attribute: K): boolean {
-		return !Utils.isNullOrEmpty(this.metaData.fieldMessages[attribute as any]);
+		return !Utils.isNullOrEmpty(this.metaData.fieldMessages[attribute as string]);
 	}
 
 	/**
@@ -420,7 +434,7 @@ export class Entity {
 	 */
 	public getFieldMessage<K extends keyof this>(attribute: K): EntityMessage | null {
 		if (this.hasFieldMessage(attribute)) {
-			return this.metaData.fieldMessages[attribute as any] ?? null;
+			return this.metaData.fieldMessages[attribute as string] ?? null;
 		}
 		return null;
 	}
@@ -430,7 +444,7 @@ export class Entity {
 	 * @param attribute
 	 */
 	public clearFieldMessage<K extends keyof this>(attribute: K): void {
-		delete this.metaData.fieldMessages[attribute as any];
+		delete this.metaData.fieldMessages[attribute as string];
 	}
 
 	/**
@@ -458,7 +472,15 @@ export class Entity {
 	 * @returns
 	 */
 	public clone(): object {
-		return Object.assign({}, this);
+		const data = JSON.parse(
+			JSON.stringify({ ...this }, (key, value) => {
+				if (key.startsWith('__')) {
+					return undefined;
+				}
+				return value;
+			}),
+		);
+		return Object.assign({}, data);
 	}
 
 	/**
@@ -527,6 +549,9 @@ export class Entity {
 		property: string,
 		validator: { args?: any; callback: ValidatorCallbackType },
 	) {
+		// Register attribute
+		this.registerAttributeName(property);
+
 		// This will register a unique validator name with a callback function, then store each property/args in the array
 		if (!this.attributeValidators[name]) {
 			this.attributeValidators[name] = [validator.callback, { property, args: validator.args }];
@@ -589,7 +614,7 @@ export class Entity {
 	 * @param message Message
 	 */
 	protected setFieldMessage<K extends keyof this>(attribute: K, message: EntityMessage) {
-		this.metaData.fieldMessages[attribute as any] = message;
+		this.metaData.fieldMessages[attribute as string] = message;
 	}
 
 	/**
@@ -598,9 +623,9 @@ export class Entity {
 	 */
 	protected canModify(attribute?: string): void {
 		if (this.isReadonly) {
-			throw new EntityReadonlyException(this.constructor.name);
+			throw new EntityReadonlyException(this.name);
 		} else if (attribute) {
-			if (this.isFieldReadonly(attribute as any) === true) {
+			if (this.isFieldReadonly(attribute as keyof this) === true) {
 				throw new AttributeReadonlyException(attribute);
 			}
 		}
@@ -653,6 +678,13 @@ export class Entity {
 	 */
 	protected onFieldHidden(attribute: string, value: boolean): boolean {
 		return typeof value === 'boolean' ? value : false;
+	}
+
+	/**
+	 * Get entity translations
+	 */
+	protected getEntityTranslations(): {} {
+		return TranslationCache.getInstance().getEntityTranslation(this.name, 'en');
 	}
 
 	/**
@@ -734,7 +766,16 @@ export class Entity {
 				if (typeof validator === 'function') {
 					const param: ValidatorArgType[] = (args as ValidatorArgType[]).filter((a) => a.property === attribute);
 					if (param.length > 0) {
-						(validator as ValidatorCallbackType)(this.clone(), attribute, value, param[0].args);
+						// Clone data and set value in order for validator to test
+						const clonedEntity = Object.assign(this.clone(), { [attribute]: value });
+						const params: ValidatorCallbackParams = {
+							entityData: clonedEntity,
+							attribute,
+							newValue: value,
+							args: param[0].args,
+							translations: this.getEntityTranslations(),
+						};
+						(validator as ValidatorCallbackType)(params);
 					}
 				}
 			});
@@ -743,7 +784,7 @@ export class Entity {
 			return false;
 		}
 
-		this.clearFieldMessage(attribute as keyof this);
+		this.clearFieldMessage(attribute as any);
 
 		return true;
 	}
@@ -761,9 +802,16 @@ export class Entity {
 
 		Object.keys(this.modifiedFields).map((k) => {
 			if (excludeValues.indexOf(k) === -1) {
-				this.validateField(k, this[k as keyof this]);
+				this.validateField(k as any, this[k as keyof this]);
 			}
 		});
+	}
+
+	/**
+	 * Cache entity key translations
+	 */
+	private cacheTranslationKeys(): void {
+		TranslationCache.getInstance().cacheEntityKeys(this);
 	}
 
 	/**
@@ -784,6 +832,7 @@ export class Entity {
 				}
 				return true;
 			},
+
 			/*get(target: Entity, property: any, receiver: any) {
 				if (property in target) {
 					return (target as any)[property];
@@ -798,8 +847,9 @@ export class Entity {
 				return true;
 			},
 			defineProperty(target: Entity, property: any, descriptor: any) {
+				console.log('define', target, property, descriptor);
 				return true;
-			}, */
+			},*/
 		};
 	}
 }

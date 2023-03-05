@@ -114,9 +114,10 @@ export class Utils {
 	 * @returns
 	 */
 	static getKeysThatDontExist(object: { [key: string]: any }, remove: { [key: string]: any }): {} {
-		Object.keys(object)
+		const copyObject = { ...object };
+		Object.keys(copyObject)
 			.filter((k) => remove.hasOwnProperty(k))
-			.map((k) => delete object[k]);
-		return object;
+			.map((k) => delete copyObject[k]);
+		return copyObject;
 	}
 }

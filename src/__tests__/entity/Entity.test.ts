@@ -360,14 +360,14 @@ describe('Entity', () => {
 			UNDEFINED!: string;
 		}
 
-		test('clone', () => {
+		test('should clone data', () => {
 			const user = new User(data);
 
 			const copyEntity: object = user.clone();
-			expect(JSON.stringify(copyEntity)).toBe(JSON.stringify(user));
+			expect(JSON.stringify(copyEntity)).toBe(JSON.stringify(data));
 		});
 
-		test('copy', () => {
+		test('should copy data and constructor', () => {
 			const user = new User(data);
 
 			const clonedEntity: User = user.copy() as User;
@@ -637,6 +637,7 @@ describe('Entity', () => {
 					STRING: () => {
 						this.STRING += '_AFTER';
 						this.setFieldRequired('STRING', true);
+						this.setFieldRequired('NUMBER', false);
 					},
 				};
 				const func = keys[attribute as keyof this];
@@ -650,6 +651,7 @@ describe('Entity', () => {
 			user.STRING = 'NEW NAME';
 			expect(user.STRING).toBe('BEFORE_AFTER');
 			expect(user.isFieldRequired('STRING')).toBe(true);
+			expect(user.isFieldRequired('NUMBER')).toBe(false);
 		});
 	});
 

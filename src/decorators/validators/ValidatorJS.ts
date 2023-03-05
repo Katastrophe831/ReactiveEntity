@@ -1,39 +1,31 @@
 // https://github.com/mikeerickson/validatorjs
+import Validator from 'validatorjs';
+import { Entity, ValidatorDecoratorConfig, ValidatorCallbackType, ValidatorCallbackParams } from '../../entity';
 
-import { Entity, ValidatorDecorator, ValidatorCallbackType } from '../../entity';
-import * as Validator from 'validatorjs';
-
-export interface ValidatorJSConfig extends ValidatorDecorator {
+export interface ValidatorJSConfig extends ValidatorDecoratorConfig {
 	rules: string | (string | Validator.TypeCheckingRule)[] | Validator.Rules;
 }
 
 export const ValidatorJS = (config: ValidatorJSConfig) => (target: Entity, member: string) => {
-	// This is required to register custom decorators
-	target.registerAttributeName(member);
-
 	const decoratorName = 'ValidatorJS';
 
-	const args = {
+	const rules = {
 		[member]: config.rules,
 	};
 
 	target.registerAttributeValidator(decoratorName, member, {
-		args, // This will be passed back to the callback function
-		callback,
+		args: rules, // This will be passed back to the callback function 'params' argument
+		callback: validator,
 	});
 };
 
-const callback: ValidatorCallbackType = (entityData: object, attribute: string, value: any, params: any) => {
-	// Assign new value to cloned data in order to run validation
-	const data = Object.assign(entityData, { [attribute]: value });
-	const validator = new Validator(data, params);
-	/* validator.setAttributeNames({
-		[attribute]: 'TEST'
-	}); */
+const validator: ValidatorCallbackType = (params: ValidatorCallbackParams) => {
+	const { entityData, attribute, newValue, translations, args } = params;
+
+	const validator = new Validator(entityData, args);
+	validator.setAttributeNames(translations);
 	if (validator.fails()) {
-		const error = validator.errors.first(attribute) as string;
-		// TODO: Throw Entity Exception
-		// TODO: Localize exception message
+		let error = validator.errors.first(attribute) as string;
 		throw new Error(error);
 	}
 };

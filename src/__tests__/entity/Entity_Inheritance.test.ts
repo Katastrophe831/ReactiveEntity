@@ -116,7 +116,7 @@ describe('Entity Inheritance', () => {
 			const entitySet: UserSet = new UserSet(data);
 			const entity: User = entitySet[0];
 			const copyEntity: object = entity.clone();
-			expect(JSON.stringify(copyEntity)).toBe(JSON.stringify(entity));
+			expect(JSON.stringify(copyEntity)).toBe(JSON.stringify(data[0]));
 		});
 
 		test('should copy data and constructor', () => {

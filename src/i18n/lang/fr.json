@@ -1,5 +1,10 @@
 {
-    "ENTITY" : {
-        "ATTRIBUTENAME" : "French"
+    "Sample": {
+      "USERNAME": "Nom d'utilisateur",
+      "PASSWORD": "Mot de passe",
+      "PASSWORD_PROFILE": "Mot de passe du profil"
+    },
+    "User" : {
+        "PROP1" : "Ma propriété"
     }
-}
+  }
