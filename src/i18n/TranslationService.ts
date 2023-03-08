@@ -5,7 +5,7 @@ export type TranslationKeys = { [key: string]: string };
 export type TranslationObject = { [key: string]: TranslationKeys };
 export type TranslationCacheType = { [key: string]: TranslationObject };
 
-export class TranslationService {	
+export class TranslationService {
 	public lang = 'en';
 
 	private static instance: TranslationService;
@@ -20,19 +20,18 @@ export class TranslationService {
 		return TranslationService.instance;
 	}
 
-	public useLang(lang : string) : Promise<any> {
+	public useLang(lang: string): Promise<any> {
 		this.lang = lang;
 		return useLang(lang);
 	}
 
-	public translate(entity: Entity, attribute: string, lang: string = this.lang): string | '' {		
+	public translate(entity: Entity, attribute: string, lang: string = this.lang): string | '' {
 		const entityName: string = entity.name;
 
 		let label = i18n().t(entityName + '.' + attribute, { context: entity.appName });
 		if (!label || label.startsWith(entityName + '.')) {
 			label = attribute;
-		}	
-		return  label ?? attribute;
+		}
+		return label ?? attribute;
 	}
-
 }

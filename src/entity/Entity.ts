@@ -56,8 +56,6 @@ export class Entity {
 
 		Object.assign(this, data, this.metaData.getUndeclaredProperties(data));
 
-		this.cacheTranslationKeys();
-
 		return new Proxy(this, this.proxyHandler);
 	}
 
@@ -307,9 +305,9 @@ export class Entity {
 
 	/**
 	 * Change language
-	 * @param lang 
+	 * @param lang
 	 */
-	public useLang(lang : string) : Promise<void> {
+	public useLang(lang: string): Promise<void> {
 		return TranslationService.getInstance().useLang(lang);
 	}
 
@@ -696,8 +694,8 @@ export class Entity {
 	 * Get entity translations
 	 */
 	protected getEntityTranslations(): {} {
-		let obj : any = {};
-		Object.keys(this).map((k : any) => {
+		const obj: any = {};
+		Object.keys(this).map((k: any) => {
 			obj[k] = this.getLabel(k) ?? k;
 		});
 		return obj;
@@ -797,7 +795,7 @@ export class Entity {
 							newValue: value,
 							args: param[0].args,
 							translations: this.getEntityTranslations(),
-							lang: TranslationService.getInstance().lang
+							lang: TranslationService.getInstance().lang,
 						};
 						(validator as ValidatorCallbackType)(params);
 					}
@@ -825,18 +823,11 @@ export class Entity {
 		}
 
 		Object.keys(this.modifiedFields).map((k) => {
-			let key = k as Keys<this>;
+			const key = k as Keys<this>;
 			if (excludeValues.indexOf(key) === -1) {
 				this.validateField(key, this[key]);
 			}
 		});
-	}
-
-	/**
-	 * Cache entity key translations
-	 */
-	private cacheTranslationKeys(): void {
-		//TranslationService.getInstance().cacheEntityKeys(this);
 	}
 
 	/**

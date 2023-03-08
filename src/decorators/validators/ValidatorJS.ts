@@ -24,7 +24,7 @@ const callback: ValidatorCallbackType = (params: ValidatorCallbackParams) => {
 
 	Validator.useLang(lang);
 	const validator = new Validator(entityData, args);
-	validator.setAttributeNames(translations);	
+	validator.setAttributeNames(translations);
 	if (validator.fails()) {
 		const error = validator.errors.first(attribute) as string;
 		throw new Error(error);
