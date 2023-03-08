@@ -9,23 +9,23 @@ export interface ValidatorJSConfig extends ValidatorDecoratorConfig {
 export const ValidatorJS = (config: ValidatorJSConfig) => (target: Entity, member: string) => {
 	const decoratorName = 'ValidatorJS';
 
-	const rules = {
+	const args = {
 		[member]: config.rules,
 	};
 
 	target.registerAttributeValidator(decoratorName, member, {
-		args: rules, // This will be passed back to the callback function 'params' argument
-		callback: validator,
+		args, // This will be passed back to the callback function 'params' argument
+		callback,
 	});
 };
 
-const validator: ValidatorCallbackType = (params: ValidatorCallbackParams) => {
+const callback: ValidatorCallbackType = (params: ValidatorCallbackParams) => {
 	const { entityData, attribute, newValue, translations, args } = params;
 
 	const validator = new Validator(entityData, args);
 	validator.setAttributeNames(translations);
 	if (validator.fails()) {
-		let error = validator.errors.first(attribute) as string;
+		const error = validator.errors.first(attribute) as string;
 		throw new Error(error);
 	}
 };

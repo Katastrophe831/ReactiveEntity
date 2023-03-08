@@ -5,7 +5,7 @@ export class AttributeNotFoundException extends Exception {
 	constructor(
 		public params: ExceptionParams = null,
 		public key: string = 'entity#attributenotfound',
-		public defaultMessage: string = 'Attribute {{0}} does not exists',
+		public defaultMessage: string = '{{0}} does not exists',
 	) {
 		super(...arguments);
 	}

@@ -645,7 +645,7 @@ describe('Entity', () => {
 			}
 		}
 
-		it('should trigger before/after event handlers', () => {
+		test('should trigger before/after event handlers', () => {
 			const user = new User(data);
 
 			user.STRING = 'NEW NAME';
@@ -794,4 +794,42 @@ describe('Entity', () => {
 			});
 		});
 	});
+
+	describe('Validation', () => {
+		const data = {
+			STRING: '1',
+			NUMBER: 1,
+		};
+		class User extends Entity {
+			@Required
+			STRING!: string;
+			NUMBER!: number;
+		}
+
+		test('should throw error', () => {
+			const user = new User(data);
+
+			user.STRING = '';
+			expect(()=>user.validate()).toThrowError('STRING is required');
+			expect(()=>user.asData).toThrowError('STRING is required');
+		});
+	});	
+
+	describe('Initialize Data, default values', () => {
+		const data = {
+			STRING: '1',
+			NUMBER: 1,
+		};
+		class User extends Entity {
+			@Required
+			STRING: string = 'String';
+			NUMBER!: number;
+		}
+
+		test('should initialize as not "to be saved"', () => {
+			const user = new User(data);
+			
+			expect(user.toBeSaved).toBeFalsy();
+		});
+	});		
 });

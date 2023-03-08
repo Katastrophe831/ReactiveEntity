@@ -5,7 +5,7 @@ export class AttributeRequiredException extends Exception {
 	constructor(
 		public params: ExceptionParams = null,
 		public key: string = 'entity#attributerequired',
-		public defaultMessage: string = 'Attribute {{0}} is required',
+		public defaultMessage: string = '{{0}} is required',
 	) {
 		super(...arguments);
 	}

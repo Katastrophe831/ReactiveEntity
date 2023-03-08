@@ -512,13 +512,16 @@ export class Entity {
 	 * Validate entity data including non-persistent data.  Throws an exception if fails
 	 */
 	public validate(): void {
-		if (this.toBeSaved === true) {
-			Object.keys({ ...this }).map((key) => {
-				if (this.requiredFields[key] && this.isNull(key as any)) {
-					throw new AttributeRequiredException(key);
-				}
-			});
-		}
+		Object.keys({ ...this }).map((key : any) => {
+			if (this.requiredFields[key] && this.isNull(key)) {
+				throw new AttributeRequiredException(this.getLabel(key));
+			}
+
+			if (this.validateField(key, (this as any)[key]) === false) {
+				const message = this.getFieldMessage(key);
+				throw new Error(message?.message);
+			}
+		});
 	}
 
 	/**
@@ -626,7 +629,7 @@ export class Entity {
 			throw new EntityReadonlyException(this.name);
 		} else if (attribute) {
 			if (this.isFieldReadonly(attribute as keyof this) === true) {
-				throw new AttributeReadonlyException(attribute);
+				throw new AttributeReadonlyException(this.getLabel(attribute as any));
 			}
 		}
 	}
@@ -736,21 +739,28 @@ export class Entity {
 	 * @param attribute
 	 * @param value
 	 */
-	private _setValue(attribute: string, value: any) {
-		// throws exception if any
-		this.canModify(attribute);
+	private _setValue(attribute: string, value: any): void {
+		let newValue = (this as any)[attribute];
+		try {
+			// throws exception if any
+			this.canModify(attribute);
 
-		const newValue = this.beforeChange(attribute, value);
+			newValue = this.beforeChange(attribute, value);
 
-		this.validateField(attribute, newValue);
+			this.validateField(attribute, newValue);
 
-		(this as any)[attribute] = newValue;
+			(this as any)[attribute] = newValue;
 
-		this.validateAllModifiedFields(attribute);
+			this.validateAllModifiedFields(attribute);
 
-		this.setFieldModified(attribute, true);
+			this.setFieldModified(attribute, true);
 
-		this.afterChange(attribute);
+			this.afterChange(attribute);
+		} catch (e) {
+			this.setFieldError(attribute as any, (e as Error).message);
+			(this as any)[attribute] = newValue;
+			throw e;
+		}
 	}
 
 	/**

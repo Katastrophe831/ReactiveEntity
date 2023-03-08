@@ -252,7 +252,7 @@ class User extends Entity {
     protected onFieldReadonly(attribute: string, value: boolean): boolean {
         console.log(value); // Current state of readonly for this field
 
-        if (attribute === 'FIRSTNAME' && this.USERID == '1') {
+        if (attribute === 'FIRSTNAME' && this.USERID === '1') {
             // override logic of readonly for this field
             return false;
         }
@@ -277,7 +277,7 @@ class User extends Entity {
     protected onFieldRequired(attribute: string, value: boolean): boolean {
         console.log(value); // true; -- Current state of readonly for this field
 
-        if (attribute === 'FIRSTNAME' && this.USERID == '1') {
+        if (attribute === 'FIRSTNAME' && this.USERID === '1') {
             // override logic of readonly for this field
             return false;
         }
@@ -302,7 +302,7 @@ class User extends Entity {
     protected onFieldHidden(attribute: string, value: boolean): boolean {
         console.log(value); // Current state of readonly for this field
 
-        if (attribute === 'FIRSTNAME' && this.USERID == '1') {
+        if (attribute === 'FIRSTNAME' && this.USERID === '1') {
             // override logic of readonly for this field
             return true;
         }
@@ -458,7 +458,7 @@ user.validate(); // Throws required field exception
 
 # Inheritance
 
-In enterprise applications, there are times when you build out of the box base models and then extend them on a per-client requierment.
+There are times when you build out of the box base models and then extend.
 
 ```typescript
 class User extends Entity {
@@ -492,11 +492,10 @@ class Gamer extends User {
     // intercepts the value BEFORE it is set on the entity
     protected onBeforeChange(attribute: string, value: any): any {        
         if (attribute === 'FIRSTNAME' && value === 'Jane') {
-            value = 'GI ' + value;
-            return super.onBeforeChange(attribute, value);
+            value = 'GI ' + value;            
         }
         // Be sure to always return a value
-        return value;
+        return super.onBeforeChange(attribute, value);
     }
 }
 
