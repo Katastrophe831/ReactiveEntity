@@ -20,10 +20,11 @@ export const ValidatorJS = (config: ValidatorJSConfig) => (target: Entity, membe
 };
 
 const callback: ValidatorCallbackType = (params: ValidatorCallbackParams) => {
-	const { entityData, attribute, newValue, translations, args } = params;
+	const { entityData, attribute, newValue, translations, args, lang } = params;
 
+	Validator.useLang(lang);
 	const validator = new Validator(entityData, args);
-	validator.setAttributeNames(translations);
+	validator.setAttributeNames(translations);	
 	if (validator.fails()) {
 		const error = validator.errors.first(attribute) as string;
 		throw new Error(error);

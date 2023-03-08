@@ -1,4 +1,4 @@
-import { TranslationCache } from '../i18n';
+import { TranslationService } from '../i18n';
 import { Utils } from '../utils';
 import {
 	EntityArgs,
@@ -299,9 +299,17 @@ export class Entity {
 	 * @param attribute
 	 * @returns
 	 */
-	public getLabel<K extends keyof this>(attribute: K, lang: string = 'en'): string {
-		const label = TranslationCache.getInstance().addEntityAttributeTranslation(this, attribute as string, lang);
+	public getLabel<K extends keyof this>(attribute: K, lang?: string): string {
+		const label = TranslationService.getInstance().translate(this, attribute as string, lang);
 		return label;
+	}
+
+	/**
+	 * Change language
+	 * @param lang 
+	 */
+	public useLang(lang : string) : Promise<void> {
+		return TranslationService.getInstance().useLang(lang);
 	}
 
 	/**
@@ -687,7 +695,11 @@ export class Entity {
 	 * Get entity translations
 	 */
 	protected getEntityTranslations(): {} {
-		return TranslationCache.getInstance().getEntityTranslation(this.name, 'en');
+		let obj : any = {};
+		Object.keys(this).map((k : any) => {
+			obj[k] = this.getLabel(k) ?? k;
+		});
+		return obj;
 	}
 
 	/**
@@ -784,6 +796,7 @@ export class Entity {
 							newValue: value,
 							args: param[0].args,
 							translations: this.getEntityTranslations(),
+							lang: TranslationService.getInstance().lang
 						};
 						(validator as ValidatorCallbackType)(params);
 					}
@@ -821,7 +834,7 @@ export class Entity {
 	 * Cache entity key translations
 	 */
 	private cacheTranslationKeys(): void {
-		TranslationCache.getInstance().cacheEntityKeys(this);
+		//TranslationService.getInstance().cacheEntityKeys(this);
 	}
 
 	/**

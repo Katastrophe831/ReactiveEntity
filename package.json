@@ -6,7 +6,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "test": "jest --config jestconfig.json --detectOpenHandles --forceExit",
-    "test:playground": "jest -i __tests__/Playground --config jestconfig.json",
+    "test:playground": "jest -i __tests__/Playground --config jestconfig.json --detectOpenHandles --forceExit",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",

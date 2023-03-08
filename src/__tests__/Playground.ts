@@ -100,4 +100,25 @@ describe('Playground', () => {
 		expect(user.FIRSTNAME).toBe('GI Jane is awesome!');
 		//console.log(user.asData);
 	});
+
+	xdescribe('i18n', () => {
+		const data = {
+			USERNAME: 'Dumb and Dumber',
+			PASSWORD: 'Samsonite',
+		};
+		class Sample extends Entity {
+			USERNAME!: string;
+			PASSWORD!: string;
+		}
+
+		test('should use FR language', async () => {
+			const user = new Sample(data);
+			await user.useLang('test-fr');
+			expect(user.getLabel('USERNAME')).toBe('Nom d\'utilisateur');
+			expect(user.getLabel('PASSWORD')).toBe('Mot de passe');
+			user.appName = "PROFILE";
+			expect(user.getLabel('PASSWORD')).toBe('Mot de passe du profil');
+		});
+	});
+
 });

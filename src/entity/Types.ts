@@ -78,6 +78,7 @@ export type ValidatorCallbackParams = {
 	entityData: object;
 	attribute: string;
 	newValue: any;
+	lang: string;
 	translations: {};
 };
 

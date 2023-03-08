@@ -1,2 +1,2 @@
-export { default as default } from './i18nService';
-export * from './TranslationCache';
+export * from './i18n';
+export * from './TranslationService';
