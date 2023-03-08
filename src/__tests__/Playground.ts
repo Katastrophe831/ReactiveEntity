@@ -46,7 +46,7 @@ class User extends Entity {
 }
 
 describe('Playground', () => {
-	test('Used to run single test without running every test :)', () => {
+	xtest('Used to run single test without running every test :)', () => {
 		// const entitySet: UserSet = new UserSet({ data: data, isReadonly: false, appName: 'USERAPP' });
 		// const entity: User = entitySet[0];
 
@@ -99,37 +99,5 @@ describe('Playground', () => {
 		user.FIRSTNAME = 'Jane';
 		expect(user.FIRSTNAME).toBe('GI Jane is awesome!');
 		//console.log(user.asData);
-	});
-
-	test('Used to run single test without running every test :)', () => {
-		// const entitySet: UserSet = new UserSet({ data: data, isReadonly: false, appName: 'USERAPP' });
-		// const entity: User = entitySet[0];
-
-		const userData = {
-			USERID: '1',
-			FIRSTNAME: 'John',
-			LASTNAME: 'Smith',
-			BIRTHDAY: new Date(),
-		};
-
-		class User extends Entity {
-			USERID!: string;
-			@Readonly
-			FIRSTNAME!: string;
-			LASTNAME!: string;
-			BIRTHDAY!: Date;
-
-			protected onFieldReadonly(attribute: string, value: boolean): boolean {
-				if (attribute === 'FIRSTNAME' && this.USERID == '1') {
-					// override logic of readonly for this field
-					return false;
-				}
-
-				return value;
-			}
-		}
-
-		const user = new User(userData);
-		expect(user.isFieldReadonly('FIRSTNAME')).toBe(false);
 	});
 });

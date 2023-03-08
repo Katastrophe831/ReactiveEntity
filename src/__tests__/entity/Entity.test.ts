@@ -810,26 +810,28 @@ describe('Entity', () => {
 			const user = new User(data);
 
 			user.STRING = '';
-			expect(()=>user.validate()).toThrowError('STRING is required');
-			expect(()=>user.asData).toThrowError('STRING is required');
+			expect(() => user.validate()).toThrowError('STRING is required');
+			expect(() => user.asData).toThrowError('STRING is required');
 		});
-	});	
+	});
 
 	describe('Initialize Data, default values', () => {
 		const data = {
-			STRING: '1',
+			STRING: 'String',
 			NUMBER: 1,
 		};
 		class User extends Entity {
-			@Required
-			STRING: string = 'String';
+			STRING!: string;
 			NUMBER!: number;
+			DEFAULT_VALUE: string = 'Default';
 		}
 
-		test('should initialize as not "to be saved"', () => {
+		test('should initialize default values', () => {
 			const user = new User(data);
-			
+
 			expect(user.toBeSaved).toBeFalsy();
+			user.DEFAULT_VALUE = 'New Value';
+			expect(user.toBeSaved).toBeTruthy();
 		});
-	});		
+	});
 });

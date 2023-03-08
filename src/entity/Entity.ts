@@ -512,7 +512,7 @@ export class Entity {
 	 * Validate entity data including non-persistent data.  Throws an exception if fails
 	 */
 	public validate(): void {
-		Object.keys({ ...this }).map((key : any) => {
+		Object.keys({ ...this }).map((key: any) => {
 			if (this.requiredFields[key] && this.isNull(key)) {
 				throw new AttributeRequiredException(this.getLabel(key));
 			}
@@ -834,7 +834,7 @@ export class Entity {
 				if (('' + property).startsWith('__')) {
 					// ignore
 				} else {
-					if (target.accessModifiers.canDoChange(property) === true) {
+					if (target.accessModifiers.canDoChange(property) === true || property in target === false) {
 						(target as any)[property] = descriptor;
 					} else {
 						target._setValue(property, descriptor);
@@ -842,7 +842,6 @@ export class Entity {
 				}
 				return true;
 			},
-
 			/*get(target: Entity, property: any, receiver: any) {
 				if (property in target) {
 					return (target as any)[property];
@@ -859,7 +858,7 @@ export class Entity {
 			defineProperty(target: Entity, property: any, descriptor: any) {
 				console.log('define', target, property, descriptor);
 				return true;
-			},*/
+			}*/
 		};
 	}
 }
