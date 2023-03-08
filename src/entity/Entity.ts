@@ -13,6 +13,7 @@ import {
 	ValidatorArgType,
 	FieldAccess,
 	ValidatorCallbackParams,
+	Keys,
 } from '.';
 import {
 	AttributeNotFoundException,
@@ -93,7 +94,7 @@ export class Entity {
 	 * Get primary key value
 	 */
 	public get primaryKeyValue(): any {
-		return (this as any)[this.primaryKeyName];
+		return this[this.primaryKeyName as Keys<this>];
 	}
 
 	/**
@@ -160,7 +161,7 @@ export class Entity {
 	 * @param attribute
 	 * @returns
 	 */
-	public isFieldModified<K extends keyof this>(attribute: K): boolean {
+	public isFieldModified<K extends Keys<this>>(attribute: K): boolean {
 		return this.modifiedFields[attribute] ?? false;
 	}
 
@@ -169,11 +170,11 @@ export class Entity {
 	 * @param attribute
 	 * @returns
 	 */
-	public isFieldReadonly<K extends keyof this>(attribute: K): boolean {
+	public isFieldReadonly<K extends Keys<this>>(attribute: K): boolean {
 		if (this.isReadonly) {
 			return true;
 		}
-		return this.onFieldReadonly(attribute as string, this.readonlyFields[attribute] ?? false);
+		return this.onFieldReadonly(attribute, this.readonlyFields[attribute] ?? false);
 	}
 
 	/**
@@ -181,8 +182,8 @@ export class Entity {
 	 * @param attribute
 	 * @returns
 	 */
-	public isFieldRequired<K extends keyof this>(attribute: K): boolean {
-		return this.onFieldRequired(attribute as string, this.requiredFields[attribute] ?? false);
+	public isFieldRequired<K extends Keys<this>>(attribute: K): boolean {
+		return this.onFieldRequired(attribute, this.requiredFields[attribute] ?? false);
 	}
 
 	/**
@@ -190,8 +191,8 @@ export class Entity {
 	 * @param attribute
 	 * @returns
 	 */
-	public isFieldHidden<K extends keyof this>(attribute: K): boolean {
-		return this.onFieldHidden(attribute as string, this.hiddenFields[attribute] ?? false);
+	public isFieldHidden<K extends Keys<this>>(attribute: K): boolean {
+		return this.onFieldHidden(attribute, this.hiddenFields[attribute] ?? false);
 	}
 
 	/**
@@ -199,7 +200,7 @@ export class Entity {
 	 * @param attribute
 	 * @returns boolean
 	 */
-	public isNull<K extends keyof this>(attribute: K): boolean {
+	public isNull<K extends Keys<this>>(attribute: K): boolean {
 		return Utils.isNullOrEmpty(this.getValue(attribute));
 	}
 
@@ -208,7 +209,7 @@ export class Entity {
 	 * @param attribute
 	 * @returns boolean
 	 */
-	public isNotNull<K extends keyof this>(attribute: K): boolean {
+	public isNotNull<K extends Keys<this>>(attribute: K): boolean {
 		return this.isNull(attribute) === false;
 	}
 
@@ -217,7 +218,7 @@ export class Entity {
 	 * @param attribute
 	 * @returns
 	 */
-	public isNumber<K extends keyof this>(attribute: K): boolean {
+	public isNumber<K extends Keys<this>>(attribute: K): boolean {
 		if (this.isNull(attribute)) {
 			return true;
 		}
@@ -239,8 +240,8 @@ export class Entity {
 	 * @param attribute
 	 * @param readonly
 	 */
-	public setFieldReadonly<K extends keyof this>(attribute: K | K[], value: boolean): void {
-		this.metaData.setReadonlyFields(attribute as any, value);
+	public setFieldReadonly<K extends Keys<this>>(attribute: K | K[], value: boolean): void {
+		this.metaData.setReadonlyFields(attribute, value);
 	}
 
 	/**
@@ -248,8 +249,8 @@ export class Entity {
 	 * @param attribute
 	 * @param required
 	 */
-	public setFieldRequired<K extends keyof this>(attribute: K | K[], value: boolean): void {
-		this.metaData.setRequiredFields(attribute as any, value);
+	public setFieldRequired<K extends Keys<this>>(attribute: K | K[], value: boolean): void {
+		this.metaData.setRequiredFields(attribute, value);
 	}
 
 	/**
@@ -257,8 +258,8 @@ export class Entity {
 	 * @param attribute
 	 * @param readonly
 	 */
-	public setFieldHidden<K extends keyof this>(attribute: K | K[], value: boolean): void {
-		this.metaData.setHiddenFields(attribute as any, value);
+	public setFieldHidden<K extends Keys<this>>(attribute: K | K[], value: boolean): void {
+		this.metaData.setHiddenFields(attribute, value);
 	}
 
 	/**
@@ -266,8 +267,8 @@ export class Entity {
 	 * @param attribute
 	 * @param hidden
 	 */
-	public setFieldNonPersistent<K extends keyof this>(attribute: K | K[]): void {
-		this.metaData.setNonPersistentFields(attribute as any);
+	public setFieldNonPersistent<K extends Keys<this>>(attribute: K | K[]): void {
+		this.metaData.setNonPersistentFields(attribute);
 	}
 
 	/**
@@ -282,7 +283,7 @@ export class Entity {
 	 * Set primary key name
 	 * @param attribute
 	 */
-	public setPrimaryKeyName<K extends keyof this>(attribute: K): void {
+	public setPrimaryKeyName<K extends Keys<this>>(attribute: K): void {
 		const value = this.metaData.primaryKeyName;
 		if (value !== null) {
 			throw new EntityException(
@@ -291,7 +292,7 @@ export class Entity {
 				'Primary Key {{0}} already exists on this entity',
 			);
 		}
-		this.metaData.setPrimaryKeyName(attribute as string);
+		this.metaData.setPrimaryKeyName(attribute);
 	}
 
 	/**
@@ -299,8 +300,8 @@ export class Entity {
 	 * @param attribute
 	 * @returns
 	 */
-	public getLabel<K extends keyof this>(attribute: K, lang?: string): string {
-		const label = TranslationService.getInstance().translate(this, attribute as string, lang);
+	public getLabel<K extends Keys<this>>(attribute: K, lang?: string): string {
+		const label = TranslationService.getInstance().translate(this, attribute, lang);
 		return label;
 	}
 
@@ -317,7 +318,7 @@ export class Entity {
 	 * @param attribute
 	 * @returns any
 	 */
-	public getValue<K extends keyof this>(attribute: K): any | null {
+	public getValue<K extends Keys<this>>(attribute: K): any | null {
 		if (attribute in this) {
 			const value = this[attribute];
 			if (value === undefined || typeof value === 'undefined') {
@@ -334,7 +335,7 @@ export class Entity {
 	 * @param attribute
 	 * @returns string
 	 */
-	public getString<K extends keyof this>(attribute: K): string | null {
+	public getString<K extends Keys<this>>(attribute: K): string | null {
 		if (this.isNotNull(attribute)) {
 			const returnValue = this.getValue(attribute);
 			return '' + returnValue;
@@ -347,7 +348,7 @@ export class Entity {
 	 * @param attribute
 	 * @returns number
 	 */
-	public getNumber<K extends keyof this>(attribute: K): number | null {
+	public getNumber<K extends Keys<this>>(attribute: K): number | null {
 		if (this.isNotNull(attribute)) {
 			const returnValue = this.getValue(attribute);
 			return Utils.converStringToNumber('' + returnValue);
@@ -360,7 +361,7 @@ export class Entity {
 	 * @param attribute
 	 * @returns boolean
 	 */
-	public getBoolean<K extends keyof this>(attribute: K): boolean {
+	public getBoolean<K extends Keys<this>>(attribute: K): boolean {
 		const val = this.getValue(attribute);
 		return val === '1' || val === true || val === 'Y' || val === 'y';
 	}
@@ -370,7 +371,7 @@ export class Entity {
 	 * @param attribute
 	 * @returns Date | null
 	 */
-	public getDate<K extends keyof this>(attribute: K): Date | null {
+	public getDate<K extends Keys<this>>(attribute: K): Date | null {
 		const value = this.getString(attribute);
 		if (typeof value === 'string') {
 			return Utils.stringToDate(value);
@@ -384,12 +385,12 @@ export class Entity {
 	 * @param value
 	 * @param flag
 	 */
-	public setValue<K extends keyof this>(attribute: K, value: any, flag?: FieldAccess): void {
+	public setValue<K extends Keys<this>>(attribute: K, value: any, flag?: FieldAccess): void {
 		if (flag === FieldAccess.NOCHANGE) {
-			this.accessModifiers.addNoChange(attribute as string);
+			this.accessModifiers.addNoChange(attribute);
 		}
 		// let proxy handle
-		(this as any)[attribute] = value;
+		this[attribute] = value;
 	}
 
 	/**
@@ -397,7 +398,7 @@ export class Entity {
 	 * @param attribute
 	 * @param message String
 	 */
-	public setFieldWarning<K extends keyof this>(attribute: K, message: string): void {
+	public setFieldWarning<K extends Keys<this>>(attribute: K, message: string): void {
 		this.setFieldMessage(attribute, {
 			type: 'warn',
 			message,
@@ -409,7 +410,7 @@ export class Entity {
 	 * @param attribute
 	 * @param message String
 	 */
-	public setFieldError<K extends keyof this>(attribute: K, message: string): void {
+	public setFieldError<K extends Keys<this>>(attribute: K, message: string): void {
 		this.setFieldMessage(attribute, {
 			type: 'error',
 			message,
@@ -421,7 +422,7 @@ export class Entity {
 	 * @param attribute
 	 * @param message String
 	 */
-	public setFieldInfo<K extends keyof this>(attribute: K, message: string): void {
+	public setFieldInfo<K extends Keys<this>>(attribute: K, message: string): void {
 		this.setFieldMessage(attribute, {
 			type: 'info',
 			message,
@@ -432,17 +433,17 @@ export class Entity {
 	 * Has field message
 	 * @param attribute
 	 */
-	public hasFieldMessage<K extends keyof this>(attribute: K): boolean {
-		return !Utils.isNullOrEmpty(this.metaData.fieldMessages[attribute as string]);
+	public hasFieldMessage<K extends Keys<this>>(attribute: K): boolean {
+		return !Utils.isNullOrEmpty(this.metaData.fieldMessages[attribute]);
 	}
 
 	/**
 	 * Get field message
 	 * @param attribute
 	 */
-	public getFieldMessage<K extends keyof this>(attribute: K): EntityMessage | null {
+	public getFieldMessage<K extends Keys<this>>(attribute: K): EntityMessage | null {
 		if (this.hasFieldMessage(attribute)) {
-			return this.metaData.fieldMessages[attribute as string] ?? null;
+			return this.metaData.fieldMessages[attribute] ?? null;
 		}
 		return null;
 	}
@@ -451,8 +452,8 @@ export class Entity {
 	 * Clear field message
 	 * @param attribute
 	 */
-	public clearFieldMessage<K extends keyof this>(attribute: K): void {
-		delete this.metaData.fieldMessages[attribute as string];
+	public clearFieldMessage<K extends Keys<this>>(attribute: K): void {
+		delete this.metaData.fieldMessages[attribute];
 	}
 
 	/**
@@ -525,7 +526,7 @@ export class Entity {
 				throw new AttributeRequiredException(this.getLabel(key));
 			}
 
-			if (this.validateField(key, (this as any)[key]) === false) {
+			if (this.validateField(key, this[key as Keys<this>]) === false) {
 				const message = this.getFieldMessage(key);
 				throw new Error(message?.message);
 			}
@@ -624,20 +625,20 @@ export class Entity {
 	 * @param attribute
 	 * @param message Message
 	 */
-	protected setFieldMessage<K extends keyof this>(attribute: K, message: EntityMessage) {
-		this.metaData.fieldMessages[attribute as string] = message;
+	protected setFieldMessage<K extends Keys<this>>(attribute: K, message: EntityMessage) {
+		this.metaData.fieldMessages[attribute] = message;
 	}
 
 	/**
 	 * Throws an exception if entity cannot be updated
 	 * @param attribute
 	 */
-	protected canModify(attribute?: string): void {
+	protected canModify(attribute?: Keys<this>): void {
 		if (this.isReadonly) {
 			throw new EntityReadonlyException(this.name);
 		} else if (attribute) {
-			if (this.isFieldReadonly(attribute as keyof this) === true) {
-				throw new AttributeReadonlyException(this.getLabel(attribute as any));
+			if (this.isFieldReadonly(attribute) === true) {
+				throw new AttributeReadonlyException(this.getLabel(attribute));
 			}
 		}
 	}
@@ -751,8 +752,8 @@ export class Entity {
 	 * @param attribute
 	 * @param value
 	 */
-	private _setValue(attribute: string, value: any): void {
-		let newValue = (this as any)[attribute];
+	private _setValue(attribute: Keys<this>, value: any): void {
+		let newValue = this[attribute];
 		try {
 			// throws exception if any
 			this.canModify(attribute);
@@ -761,7 +762,7 @@ export class Entity {
 
 			this.validateField(attribute, newValue);
 
-			(this as any)[attribute] = newValue;
+			this[attribute] = newValue;
 
 			this.validateAllModifiedFields(attribute);
 
@@ -769,8 +770,8 @@ export class Entity {
 
 			this.afterChange(attribute);
 		} catch (e) {
-			this.setFieldError(attribute as any, (e as Error).message);
-			(this as any)[attribute] = newValue;
+			this.setFieldError(attribute, (e as Error).message);
+			this[attribute] = newValue;
 			throw e;
 		}
 	}
@@ -781,7 +782,7 @@ export class Entity {
 	 * @param value
 	 * @returns {boolean} true if success, false if fails
 	 */
-	private validateField(attribute: string, value: any): boolean {
+	private validateField(attribute: Keys<this>, value: any): boolean {
 		try {
 			Object.keys(this.attributeValidators).map((k) => {
 				const [validator, ...args] = this.attributeValidators[k];
@@ -803,11 +804,11 @@ export class Entity {
 				}
 			});
 		} catch (e) {
-			this.setFieldError(attribute as any, (e as Error).message);
+			this.setFieldError(attribute, (e as Error).message);
 			return false;
 		}
 
-		this.clearFieldMessage(attribute as any);
+		this.clearFieldMessage(attribute);
 
 		return true;
 	}
@@ -815,7 +816,7 @@ export class Entity {
 	/**
 	 * Validate all modified fields
 	 */
-	private validateAllModifiedFields(exclude?: string | string[]): void {
+	private validateAllModifiedFields<K extends Keys<this>>(exclude?: K | K[]): void {
 		const excludeValues: string[] = [];
 		if (Array.isArray(exclude)) {
 			excludeValues.push(...exclude);
@@ -824,8 +825,9 @@ export class Entity {
 		}
 
 		Object.keys(this.modifiedFields).map((k) => {
-			if (excludeValues.indexOf(k) === -1) {
-				this.validateField(k as any, this[k as keyof this]);
+			let key = k as Keys<this>;
+			if (excludeValues.indexOf(key) === -1) {
+				this.validateField(key, this[key]);
 			}
 		});
 	}

@@ -1,5 +1,7 @@
 import { Entity } from '.';
 
+export type Keys<T> = string & keyof T;
+
 export type EntityType = new (args?: EntityArgs) => Entity;
 
 export type EntityAttributes<T> = {
