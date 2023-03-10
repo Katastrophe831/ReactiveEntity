@@ -1,4 +1,4 @@
-export * from './AttributeConfig';
+export * from './Field';
 export * from './NonPersistent';
 export * from './PrimaryKey';
 export * from './Readonly';

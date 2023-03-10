@@ -1,7 +1,7 @@
 {
   "name": "reactive-entity",
   "version": "1.0.0",
-  "description": "A reactive entity model for enterprise data forms",
+  "description": "A reactive entity model",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {

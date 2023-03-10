@@ -20,6 +20,8 @@ import {
 	AttributeReadonlyException,
 	AttributeRequiredException,
 	EntityReadonlyException,
+	PrimaryKeyNotFoundException,
+	PrimaryKeyExistsException,
 	EntityException,
 } from '../exceptions';
 
@@ -56,9 +58,14 @@ export class Entity {
 
 		Object.assign(this, data, this.metaData.getUndeclaredProperties(data));
 
+		this.useLang('en');
+
 		return new Proxy(this, this.proxyHandler);
 	}
 
+	/**
+	 * Entity name
+	 */
 	public get name(): string {
 		return this.constructor.name;
 	}
@@ -83,7 +90,7 @@ export class Entity {
 	public get primaryKeyName(): string {
 		const value = this.metaData.primaryKeyName;
 		if (value === null) {
-			throw new EntityException(this.name, 'entity#primarykeynotfound', 'Primary key not defined for object {{0}}');
+			throw new PrimaryKeyNotFoundException(this.name);
 		}
 		return value;
 	}
@@ -284,13 +291,10 @@ export class Entity {
 	public setPrimaryKeyName<K extends Keys<this>>(attribute: K): void {
 		const value = this.metaData.primaryKeyName;
 		if (value !== null) {
-			throw new EntityException(
-				this.primaryKeyName,
-				'entity#primarykeyexists',
-				'Primary Key {{0}} already exists on this entity',
-			);
+			throw new PrimaryKeyExistsException(this.primaryKeyName);
 		}
 		this.metaData.setPrimaryKeyName(attribute);
+		this.setFieldRequired(attribute, true);
 	}
 
 	/**
@@ -520,10 +524,6 @@ export class Entity {
 	 */
 	public validate(): void {
 		Object.keys({ ...this }).map((key: any) => {
-			if (this.requiredFields[key] && this.isNull(key)) {
-				throw new AttributeRequiredException(this.getLabel(key));
-			}
-
 			if (this.validateField(key, this[key as Keys<this>]) === false) {
 				const message = this.getFieldMessage(key);
 				throw new Error(message?.message);
@@ -801,6 +801,10 @@ export class Entity {
 					}
 				}
 			});
+
+			if (this.isFieldRequired(attribute) && Utils.isNullOrEmpty(value)) {
+				throw new AttributeRequiredException(this.getLabel(attribute));
+			}
 		} catch (e) {
 			this.setFieldError(attribute, (e as Error).message);
 			return false;

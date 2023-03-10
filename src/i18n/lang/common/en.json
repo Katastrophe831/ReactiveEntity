@@ -1,0 +1,15 @@
+{
+    "exceptions" : {
+        "entity" : {
+            "readonly": "Entity {{0}} is readonly",
+            "attributereadonly" : "{{0}} is readonly",
+            "attributerequired" : "{{0}} is required",
+            "attributenotfound": "{{0}} does not exists",
+            "primarykeyexists": "Primary key {{0}} already exists on this entity",
+            "primarykeynotfound": "Primary key not defined for object {{0}}"
+        },
+        "entityset" : {
+            "readonly": "Entity Set {{0}} is readonly"
+        }
+    }
+}

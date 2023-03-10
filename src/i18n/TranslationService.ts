@@ -34,4 +34,9 @@ export class TranslationService {
 		}
 		return label ?? attribute;
 	}
+
+	public translateNamespace(key: string, namespace: string = 'common', lang: string = this.lang): string | '' {
+		const label = i18n().t(key, { ns: namespace });
+		return label ?? key;
+	}
 }

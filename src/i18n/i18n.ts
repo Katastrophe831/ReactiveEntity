@@ -7,12 +7,12 @@ export function i18n() {
 	return i18next;
 }
 
-export function useLang(lang: string): Promise<any> {
-	init();
+export async function useLang(lang: string): Promise<any> {
+	await init();
 	return i18next.changeLanguage(lang);
 }
 
-function init() {
+async function init() {
 	/* if (!i18next.isInitialized) {
 		i18next.use(ChainedBackend).init({
 			fallbackLng: 'en',			
@@ -33,9 +33,33 @@ function init() {
 	} */
 
 	if (!i18next.isInitialized) {
-		i18next.use(resourcesToBackend((lng: string, ns: string) => import(`./lang/${lng}.json`))).init({
+		await i18next.use(resourcesToBackend((lng: string, ns: string) => import(`./lang/${ns}/${lng}.json`))).init({
 			fallbackLng: 'en',
+			ns: ['common', 'translation'],
 			// debug: true,
 		});
 	}
 }
+
+i18next.off('failedLoading');
+i18next.on('failedLoading', (lng, ns, msg) => {
+	import(`./lang/${ns}/${lng}.json`)
+		.then((d) => {
+			i18next.addResourceBundle(lng, ns, d.default, true);
+		})
+		.catch((e) => {
+			// ignore
+		});
+});
+
+i18next.off('languageChanged');
+i18next.on('languageChanged', (lng: string) => {
+	const ns = 'common';
+	import(`./lang/${ns}/${lng}.json`)
+		.then((d) => {
+			i18next.addResourceBundle(lng, ns, d.default, true);
+		})
+		.catch((e) => {
+			// ignore
+		});
+});

@@ -1,5 +1,6 @@
 import { MessageFormatter } from '../utils';
 import { ExceptionKey, ExceptionParams } from '.';
+import { TranslationService } from '../i18n';
 
 export class Exception extends Error {
 	constructor(public params?: ExceptionParams, public key?: ExceptionKey, public defaultMessage?: string) {
@@ -8,6 +9,11 @@ export class Exception extends Error {
 	}
 
 	public get message(): string {
-		return MessageFormatter.formatString(this.defaultMessage, this.params) ?? '';
+		let msg: string = TranslationService.getInstance().translateNamespace(this.key ?? '');
+		if (msg === this.key) {
+			msg = this.defaultMessage ?? msg;
+		}
+		msg = MessageFormatter.formatString(msg, this.params) ?? '';
+		return msg;
 	}
 }

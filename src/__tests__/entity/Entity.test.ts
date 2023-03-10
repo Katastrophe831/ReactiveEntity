@@ -843,15 +843,29 @@ describe('Entity', () => {
 		class Sample extends Entity {
 			USERNAME!: string;
 			PASSWORD!: string;
+			UNDEFINED: undefined;
 		}
 
-		test('should use FR language', async () => {
+		test('should use FR language then switch to EN', async () => {
 			const user = new Sample(data);
 			await user.useLang('test-fr');
 			expect(user.getLabel('USERNAME')).toBe("Nom d'utilisateur");
 			expect(user.getLabel('PASSWORD')).toBe('Mot de passe');
 			user.appName = 'PROFILE';
 			expect(user.getLabel('PASSWORD')).toBe('Mot de passe du profil');
+
+			expect(() => user.getValue('UNDEFINED')).toThrowError("UNDEFINED N'existe pas");
+			expect(() => {
+				user.setFieldReadonly('USERNAME', true);
+				user.USERNAME = 'test';
+			}).toThrowError("Nom d'utilisateur est en lecture seule");
+
+			await user.useLang('en');
+			expect(() => user.getValue('UNDEFINED')).toThrowError('UNDEFINED does not exist');
+			expect(() => {
+				user.setFieldReadonly('USERNAME', true);
+				user.USERNAME = 'test';
+			}).toThrowError('User name is readonly');
 		});
 	});
 });

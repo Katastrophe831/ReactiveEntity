@@ -1,0 +1,15 @@
+{
+    "exceptions": {
+      "entity": {
+        "readonly": "Entité {{0}} est en lecture seule",
+        "attributereadonly": "{{0}} est en lecture seule",
+        "attributerequired": "{{0}} est requis",
+        "attributenotfound": "{{0}} N'existe pas",
+        "primarykeyexists": "Clé primaire {{0}} existe déjà sur cette entité",
+        "primarykeynotfound": "Clé primaire non définie pour l'objet {{0}}"
+      },
+      "entityset": {
+        "readonly": "Ensemble d'entités {{0}} est en lecture seule"
+      }
+    }
+  }

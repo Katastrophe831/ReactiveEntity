@@ -5,4 +5,7 @@ export * from './EntityReadonlyException';
 export * from './EntitySetReadonlyException';
 export * from './EntityException';
 export * from './Exception';
+export * from './Exception';
+export * from './PrimaryKeyExistsException';
+export * from './PrimaryKeyNotFoundException';
 export * from './Types';
