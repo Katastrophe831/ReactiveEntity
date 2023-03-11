@@ -22,7 +22,6 @@ import {
 	EntityReadonlyException,
 	PrimaryKeyNotFoundException,
 	PrimaryKeyExistsException,
-	EntityException,
 } from '../exceptions';
 
 export class Entity {
@@ -82,6 +81,7 @@ export class Entity {
 	 */
 	public set appName(app: string | null) {
 		this.metaData.appName = app;
+		this.translateEntityKeys();
 	}
 
 	/**
@@ -311,8 +311,9 @@ export class Entity {
 	 * Change language
 	 * @param lang
 	 */
-	public useLang(lang: string): Promise<void> {
-		return TranslationService.getInstance().useLang(lang);
+	public async useLang(lang: string): Promise<void> {
+		await TranslationService.getInstance().useLang(lang);
+		this.translateEntityKeys();
 	}
 
 	/**
@@ -523,7 +524,10 @@ export class Entity {
 	 * Validate entity data including non-persistent data.  Throws an exception if fails
 	 */
 	public validate(): void {
-		Object.keys({ ...this }).map((key: any) => {
+		Object.keys(this).map((key: any) => {
+			if (key.startsWith('__')) {
+				return;
+			}
 			if (this.validateField(key, this[key as Keys<this>]) === false) {
 				const message = this.getFieldMessage(key);
 				throw new Error(message?.message);
@@ -535,7 +539,7 @@ export class Entity {
 	 * DTO object
 	 * @returns
 	 */
-	public get asData(): {} {
+	public toData(): {} {
 		this.validate();
 
 		return JSON.stringify({ ...this }, (key, value) => {
@@ -545,6 +549,13 @@ export class Entity {
 			}
 			return value;
 		});
+	}
+
+	/**
+	 * Get entity translations
+	 */
+	public get entityTranslations(): any {
+		return TranslationService.getInstance().getEntityTranslations(this);
 	}
 
 	/**
@@ -631,7 +642,7 @@ export class Entity {
 	 * Throws an exception if entity cannot be updated
 	 * @param attribute
 	 */
-	protected canModify(attribute?: Keys<this>): void {
+	protected canModify(attribute?: Keys<this>): void | never {
 		if (this.isReadonly) {
 			throw new EntityReadonlyException(this.name);
 		} else if (attribute) {
@@ -691,9 +702,10 @@ export class Entity {
 	}
 
 	/**
-	 * Get entity translations
+	 * Translate entity keys
+	 * @returns
 	 */
-	protected getEntityTranslations(): {} {
+	protected translateEntityKeys() {
 		const obj: any = {};
 		Object.keys(this).map((k: any) => {
 			obj[k] = this.getLabel(k) ?? k;
@@ -794,7 +806,7 @@ export class Entity {
 							attribute,
 							newValue: value,
 							args: param[0].args,
-							translations: this.getEntityTranslations(),
+							translations: this.entityTranslations,
 							lang: TranslationService.getInstance().lang,
 						};
 						(validator as ValidatorCallbackType)(params);

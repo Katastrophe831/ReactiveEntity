@@ -676,7 +676,7 @@ describe('Entity', () => {
 
 				user.NON_PERSISTENT_FIELD = 'test';
 				expect(user.NON_PERSISTENT_FIELD).toBe('test');
-				expect(user.asData).toBe(JSON.stringify(data));
+				expect(user.toData()).toBe(JSON.stringify(data));
 			});
 
 			test('should default value to null', () => {
@@ -811,7 +811,7 @@ describe('Entity', () => {
 
 			user.STRING = '';
 			expect(() => user.validate()).toThrowError('STRING is required');
-			expect(() => user.asData).toThrowError('STRING is required');
+			expect(() => user.toData()).toThrowError('STRING is required');
 		});
 	});
 

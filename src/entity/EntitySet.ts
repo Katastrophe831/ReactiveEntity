@@ -5,7 +5,7 @@ export abstract class EntitySet extends Array {
 	/**
 	 * Meta data
 	 */
-	private readonly __METADATA__: EntitySetMetaData = new EntitySetMetaData();
+	private __METADATA!: EntitySetMetaData;
 
 	constructor(args?: {} | EntitySetArgs) {
 		super();
@@ -13,9 +13,9 @@ export abstract class EntitySet extends Array {
 		if (args !== undefined) {
 			let data: any;
 			if (entitySetArgsTypeGuard(args)) {
-				this.__METADATA__.ownerEntity = args.owner || null;
-				this.__METADATA__.appName = args.appName ?? null;
-				this.__METADATA__.isReadonly = args.isReadonly ?? false;
+				this.metaData.ownerEntity = args.owner || null;
+				this.metaData.appName = args.appName ?? null;
+				this.metaData.isReadonly = args.isReadonly ?? false;
 				data = args.data;
 			} else {
 				data = args;
@@ -28,14 +28,14 @@ export abstract class EntitySet extends Array {
 	 * App name
 	 */
 	public get appName(): string | null {
-		return this.__METADATA__.appName;
+		return this.metaData.appName ?? null;
 	}
 
 	/**
 	 * Set app name
 	 */
 	public set appName(app: string | null) {
-		this.__METADATA__.appName = app;
+		this.metaData.appName = app;
 	}
 
 	/**
@@ -49,7 +49,7 @@ export abstract class EntitySet extends Array {
 	 * Is readonly
 	 */
 	public get isReadonly(): boolean {
-		return this.__METADATA__.isReadonly;
+		return this.metaData.isReadonly;
 	}
 
 	/**
@@ -60,7 +60,7 @@ export abstract class EntitySet extends Array {
 	public addNew(data: any): Entity {
 		this.canModify();
 
-		const entity = this.createEntityInstance(Object.assign({ data }, this.__METADATA__));
+		const entity = this.createEntityInstance(Object.assign({ data }, this.metaData));
 		this.push(entity);
 
 		return entity;
@@ -71,7 +71,7 @@ export abstract class EntitySet extends Array {
 	 * @param readonly
 	 */
 	public setReadonly(readonly: boolean): void {
-		this.__METADATA__.isReadonly = readonly;
+		this.metaData.isReadonly = readonly;
 		this.forEach((e: Entity) => e.setReadonly(readonly));
 	}
 
@@ -79,7 +79,7 @@ export abstract class EntitySet extends Array {
 	 * Mark all entities as selected
 	 */
 	public selectAll(): void {
-		this.__METADATA__.isSelectAll = true;
+		this.metaData.isSelectAll = true;
 		this.map((entity) => entity.select());
 	}
 
@@ -87,7 +87,7 @@ export abstract class EntitySet extends Array {
 	 * Mark all entities as unselected
 	 */
 	public unselectAll(): void {
-		this.__METADATA__.isSelectAll = false;
+		this.metaData.isSelectAll = false;
 		this.map((entity) => entity.unselect());
 	}
 
@@ -95,7 +95,7 @@ export abstract class EntitySet extends Array {
 	 * Toggle select all
 	 */
 	public toggleSelectAll(): void {
-		if (this.__METADATA__.isSelectAll === true) {
+		if (this.metaData.isSelectAll === true) {
 			this.unselectAll();
 		} else {
 			this.selectAll();
@@ -130,13 +130,23 @@ export abstract class EntitySet extends Array {
 	protected abstract get entityClass(): EntityType;
 
 	/**
+	 * Get meta data
+	 */
+	protected get metaData(): EntitySetMetaData {
+		if (!this.__METADATA) {
+			this.__METADATA = new EntitySetMetaData();
+		}
+		return this.__METADATA;
+	}
+
+	/**
 	 * Add array of objects to set regardless if the entity set can be modified or not
 	 * @param data -
 	 */
 	protected addToSet(data: any[] | undefined) {
 		if (data && Array.isArray(data) && data.length > 0) {
 			data.forEach((d) => {
-				this.push(this.createEntityInstance(Object.assign({ data: d }, this.__METADATA__)));
+				this.push(this.createEntityInstance(Object.assign({ data: d }, this.metaData)));
 			});
 		}
 	}
@@ -144,7 +154,7 @@ export abstract class EntitySet extends Array {
 	/**
 	 * Throws an exception if this set cannot be modified
 	 */
-	protected canModify(): void {
+	protected canModify(): void | never {
 		if (this.isReadonly) {
 			throw new EntitySetReadonlyException(this.constructor.name);
 		}
